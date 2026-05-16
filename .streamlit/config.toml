@@ -1,0 +1,10 @@
+[server]
+headless = true
+runOnSave = true
+fileWatcherType = "auto"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "dark"

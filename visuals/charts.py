@@ -117,7 +117,7 @@ def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
         "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
         "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
         "ICR Score": [round(m.icr_score * 100, 1) for m in metrics],
-        "Amplification": [f"{m.token_amplification:.1f}x" for m in metrics],
+        "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
     }
 
     return pd.DataFrame(data)

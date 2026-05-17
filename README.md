@@ -1,6 +1,6 @@
 # ICR Lab
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://icr-lab.streamlit.app/)
+[![Open in Streamlit](https://img.shields.io/badge/Open%20in-Streamlit-red?logo=streamlit)](https://icr-lab.streamlit.app/)
 
 A companion demo for the article [**ICR: Measuring the Power of Intent**](https://blogs.kameshs.dev/intent-compression-ratio-measuring-the-power-of-intent-ceb6faf2e2f9).
 

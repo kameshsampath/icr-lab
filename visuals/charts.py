@@ -142,7 +142,7 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
         fig.add_trace(go.Indicator(
             mode="gauge+number",
             value=m.icr_score,
-            title={"text": title_text, "font": {"size": 12}},
+            title={"text": ""},
             number={"font": {"size": 20}, "valueformat": ".2f"},
             gauge=dict(
                 axis=dict(range=[0, 1]),
@@ -156,9 +156,22 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
             ),
         ), row=1, col=i + 1)
 
+    # Add mode labels below each gauge
+    for i, m in enumerate(metrics):
+        is_best = m.icr_score == best_score
+        title_text = f"{'⭐ ' if is_best else ''}{m.mode}"
+        x_pos = (i + 0.5) / n
+        fig.add_annotation(
+            text=title_text,
+            x=x_pos, y=-0.15,
+            xref="paper", yref="paper",
+            showarrow=False,
+            font=dict(size=12),
+        )
+
     fig.update_layout(
-        height=200,
-        margin=dict(l=20, r=20, t=40, b=20),
+        height=220,
+        margin=dict(l=20, r=20, t=20, b=40),
         template="plotly_white",
     )
 

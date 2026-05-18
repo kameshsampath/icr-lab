@@ -116,7 +116,7 @@ def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
         "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
         "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
         "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
-        "ICR Score": [round(m.icr_score * 100, 1) for m in metrics],
+        "ICR Score": [round(m.icr_score, 2) for m in metrics],
         "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
     }
 
@@ -134,21 +134,24 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
         horizontal_spacing=0.05,
     )
 
+    best_score = max(m.icr_score for m in metrics)
     for i, m in enumerate(metrics):
         color = MODE_COLORS.get(m.mode, "rgb(107, 114, 128)")
+        is_best = m.icr_score == best_score
+        title_text = f"{'⭐ ' if is_best else ''}{m.mode}"
         fig.add_trace(go.Indicator(
             mode="gauge+number",
-            value=m.icr_score * 100,
-            title={"text": m.mode, "font": {"size": 12}},
-            number={"font": {"size": 20}, "suffix": "%"},
+            value=m.icr_score,
+            title={"text": title_text, "font": {"size": 12}},
+            number={"font": {"size": 20}, "valueformat": ".2f"},
             gauge=dict(
-                axis=dict(range=[0, 100]),
+                axis=dict(range=[0, 1]),
                 bar=dict(color=color),
                 bgcolor="white",
                 steps=[
-                    dict(range=[0, 30], color="rgb(254, 226, 226)"),
-                    dict(range=[30, 60], color="rgb(254, 243, 199)"),
-                    dict(range=[60, 100], color="rgb(209, 250, 229)"),
+                    dict(range=[0, 0.3], color="rgb(254, 226, 226)"),
+                    dict(range=[0.3, 0.6], color="rgb(254, 243, 199)"),
+                    dict(range=[0.6, 1.0], color="rgb(209, 250, 229)"),
                 ],
             ),
         ), row=1, col=i + 1)

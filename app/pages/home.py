@@ -183,8 +183,11 @@ st.divider()
 
 # --- Relative ICR Scores ---
 st.subheader("Relative ICR Scores")
+best_mode = max(metrics, key=lambda m: m.icr_score)
+st.success(f"**Best: {best_mode.mode}** — ICR score {best_mode.icr_score:.2f}")
 st.caption(
-    "Scores are normalized against the most efficient mode in the current simulation."
+    "Each mode's ICR is divided by the best mode's ICR: "
+    "1.0 = most token-efficient, 0.5 = uses 2\u00d7 more tokens per operation, etc."
 )
 st.plotly_chart(icr_gauge_chart(metrics), width="stretch")
 
@@ -213,9 +216,9 @@ with col_right:
         column_config={
             "ICR Score": st.column_config.ProgressColumn(
                 "ICR Score",
-                min_value=0,
-                max_value=100,
-                format="%.1f%%",
+                min_value=0.0,
+                max_value=1.0,
+                format="%.2f",
             ),
         },
     )

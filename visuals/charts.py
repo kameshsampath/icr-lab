@@ -143,7 +143,7 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
             mode="gauge+number",
             value=relative_pct,
             title={"text": ""},
-            number={"font": {"size": 18}, "suffix": "%"},
+            number={"font": {"size": 18}, "suffix": "%", "valueformat": ".2f"},
             gauge=dict(
                 axis=dict(range=[0, 100]),
                 bar=dict(color=color),
@@ -161,7 +161,7 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
         domain = fig.get_subplot(1, i + 1)
         x_center = (domain.x[0] + domain.x[1]) / 2
         fig.add_annotation(
-            text=f"<b>{m.mode}</b><br>Raw ICR: {m.raw_icr_score}",
+            text=f"<b>{m.mode}</b><br>Raw ICR: {m.raw_icr_score:.2f}",
             x=x_center, y=-0.2,
             xref="paper", yref="paper",
             xanchor="center",

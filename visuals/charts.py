@@ -17,6 +17,7 @@ MODE_COLORS = {
     "Clarification Heavy": "rgb(249, 115, 22)",    # orange
     "Context-Aware": "rgb(59, 130, 246)",           # blue
     "Intent-Optimized": "rgb(16, 185, 129)",        # green
+    "Over-Compressed": "rgb(168, 85, 247)",         # purple
 }
 
 
@@ -116,7 +117,8 @@ def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
         "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
         "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
         "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
-        "ICR Score": [round(m.icr_score, 2) for m in metrics],
+        "Raw ICR": [m.raw_icr_score for m in metrics],
+        "Relative ICR": [round(m.icr_score * 100, 1) for m in metrics],
         "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
     }
 
@@ -124,7 +126,7 @@ def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
 
 
 def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
-    """Small multiples of ICR scores as indicator gauges."""
+    """Dual display ICR gauges: raw ICR as number, relative % as gauge bar."""
     from plotly.subplots import make_subplots
 
     n = len(metrics)
@@ -134,47 +136,42 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
         horizontal_spacing=0.05,
     )
 
-    best_score = max(m.icr_score for m in metrics)
     for i, m in enumerate(metrics):
         color = MODE_COLORS.get(m.mode, "rgb(107, 114, 128)")
-        is_best = m.icr_score == best_score
-        title_text = f"{'⭐ ' if is_best else ''}{m.mode}"
+        relative_pct = m.icr_score * 100
         fig.add_trace(go.Indicator(
             mode="gauge+number",
-            value=m.icr_score,
+            value=relative_pct,
             title={"text": ""},
-            number={"font": {"size": 20}, "valueformat": ".2f"},
+            number={"font": {"size": 18}, "suffix": "%"},
             gauge=dict(
-                axis=dict(range=[0, 1]),
+                axis=dict(range=[0, 100]),
                 bar=dict(color=color),
                 bgcolor="white",
                 steps=[
-                    dict(range=[0, 0.3], color="rgb(254, 226, 226)"),
-                    dict(range=[0.3, 0.6], color="rgb(254, 243, 199)"),
-                    dict(range=[0.6, 1.0], color="rgb(209, 250, 229)"),
+                    dict(range=[0, 30], color="rgb(254, 226, 226)"),
+                    dict(range=[30, 60], color="rgb(254, 243, 199)"),
+                    dict(range=[60, 100], color="rgb(209, 250, 229)"),
                 ],
             ),
         ), row=1, col=i + 1)
 
-    # Add mode labels below each gauge, centered on each subplot domain
+    # Add mode labels and raw ICR below each gauge
     for i, m in enumerate(metrics):
-        is_best = m.icr_score == best_score
-        title_text = f"{'⭐ ' if is_best else ''}{m.mode}"
-        # Get the subplot domain to find its center x position
         domain = fig.get_subplot(1, i + 1)
         x_center = (domain.x[0] + domain.x[1]) / 2
         fig.add_annotation(
-            text=title_text,
-            x=x_center, y=-0.15,
+            text=f"<b>{m.mode}</b><br>Raw ICR: {m.raw_icr_score}",
+            x=x_center, y=-0.2,
             xref="paper", yref="paper",
             xanchor="center",
             showarrow=False,
-            font=dict(size=12),
+            font=dict(size=11),
         )
 
     fig.update_layout(
-        height=220,
-        margin=dict(l=20, r=20, t=20, b=40),
+        height=240,
+        margin=dict(l=20, r=20, t=20, b=60),
         template="plotly_white",
     )
 

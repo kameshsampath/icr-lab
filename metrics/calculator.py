@@ -24,6 +24,7 @@ class ModeMetrics:
     interaction_rounds: int
     estimated_cost: float
     icr_score: float  # normalized 0-1, highest = 1.0
+    raw_icr_score: float  # absolute ICR value
     token_amplification: float
 
 
@@ -85,6 +86,7 @@ def compute_metrics(results: list[SimulationResult]) -> list[ModeMetrics]:
                 interaction_rounds=len(result.rounds),
                 estimated_cost=cost,
                 icr_score=normalized_icr,
+                raw_icr_score=round(raw_icr, 1),
                 token_amplification=amplification,
             )
         )

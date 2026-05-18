@@ -55,6 +55,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Deploy Openflow connector: GCS target, PAT auth, NiPyAPI client."
             ),
+            "Over-Compressed": "Deploy connector.",
         },
     },
     {
@@ -98,6 +99,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Deploy payment-service: k8s, HPA 2-10, full observability (metrics/dashboards/alerts/tracing)."
             ),
+            "Over-Compressed": "Deploy payment service to k8s.",
         },
     },
     {
@@ -136,6 +138,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Iceberg table: ANALYTICS db, S3 external volume (us-east-1), validate access."
             ),
+            "Over-Compressed": "Create Iceberg table on S3.",
         },
     },
     {
@@ -179,6 +182,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Refactor auth → OAuth2: authz code + PKCE, JWT middleware, refresh rotation, migrate clients."
             ),
+            "Over-Compressed": "Switch auth to OAuth2.",
         },
     },
     {
@@ -226,6 +230,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "CDC pipeline: Postgres → Kafka (Avro) → warehouse. Transforms, DLQ, monitoring, backfill."
             ),
+            "Over-Compressed": "Set up CDC pipeline.",
         },
     },
     {
@@ -259,6 +264,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Network access: allow googleapis.com for service user, validate."
             ),
+            "Over-Compressed": "Allow network access.",
         },
     },
     {
@@ -308,6 +314,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Microservices on k8s: Istio mesh, canary 10%, mTLS, circuit breakers, rate limits, HPA."
             ),
+            "Over-Compressed": "Deploy microservices with Istio.",
         },
     },
     {
@@ -354,6 +361,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Rate limiter: sliding window, Redis + Lua atomics, HTTP middleware, metrics, tests."
             ),
+            "Over-Compressed": "Build a rate limiter.",
         },
     },
     {
@@ -404,6 +412,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Terraform: multi-region AWS DR (east-1/west-2), RDS replica, Route53 failover, S3 CRR, CloudFront, modular."
             ),
+            "Over-Compressed": "Terraform multi-region AWS.",
         },
     },
     {
@@ -454,6 +463,7 @@ EXAMPLES = [
             "Intent-Optimized": (
                 "Ansible: CIS L1 hardening, SSH lockdown, firewalld, node_exporter, Filebeat, auto-patches, OpenSCAP report."
             ),
+            "Over-Compressed": "Harden the Linux servers.",
         },
     },
 ]

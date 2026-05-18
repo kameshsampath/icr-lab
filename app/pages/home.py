@@ -78,13 +78,14 @@ st.markdown(
     "*Same intent. Different interaction architecture. Different token economics.*"
 )
 st.markdown(
-    "ICR Lab simulates four interaction modes and compares their token footprint:"
+    "ICR Lab simulates five interaction modes and compares their token footprint:"
 )
 st.markdown(
     "- **Verbose Prompting** — long, detailed prompts with repeated context\n"
     "- **Clarification Heavy** — multiple back-and-forth rounds\n"
     "- **Context-Aware** — structured requests with partial reuse\n"
-    "- **Intent-Optimized** — single compressed intent expression"
+    "- **Intent-Optimized** — single compressed intent expression\n"
+    "- **Over-Compressed** — too terse, triggers correction loops that amplify tokens"
 )
 
 # ICR Formula
@@ -101,7 +102,7 @@ if not task_input:
     st.stop()
 
 # Invalidate stale session state on code changes
-_METRICS_VERSION = 7
+_METRICS_VERSION = 8
 if st.session_state.get("_metrics_version") != _METRICS_VERSION:
     for key in ["results", "metrics", "savings", "task", "operations"]:
         st.session_state.pop(key, None)
@@ -216,11 +217,11 @@ with col_right:
         width="stretch",
         hide_index=True,
         column_config={
-            "ICR Score": st.column_config.ProgressColumn(
-                "ICR Score",
-                min_value=0.0,
-                max_value=1.0,
-                format="%.2f",
+            "Relative ICR": st.column_config.ProgressColumn(
+                "Relative ICR",
+                min_value=0,
+                max_value=100,
+                format="%.1f%%",
             ),
         },
     )

@@ -111,6 +111,16 @@ st.markdown(
 
 st.divider()
 
+st.subheader("Over-Compressed")
+st.markdown(
+    "Over-compressed prompts strip so much context that the system misinterprets the intent. "
+    "This triggers correction rounds that often consume more tokens than a moderately verbose "
+    "prompt would have. High compression only works when the receiver has enough shared context "
+    "to decompress accurately."
+)
+
+st.divider()
+
 st.subheader("Intent Fulfilled")
 st.markdown(
     "Intent fulfilled is a simplified score used by the simulation to represent "

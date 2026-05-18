@@ -65,6 +65,7 @@ streamlit run app/main.py
 |------|----------|-----------------|
 | Verbose Prompting | Large prompts with repeated context | Lowest |
 | Clarification Heavy | Multiple rounds with growing context | Low |
+| Over-Compressed | Ambiguous compressed prompt triggers correction loops | Variable (often worse than Context-Aware) |
 | Context-Aware | Structured requests with partial reuse | Moderate |
 | Intent-Optimized | Single compressed intent expression | Highest |
 
@@ -75,7 +76,7 @@ icr-lab/
 ├── app/
 │   ├── main.py              # Streamlit dashboard (main page)
 │   └── pages/help.py        # Help / Glossary page
-├── simulations/engine.py    # Simulation logic for 4 modes
+├── simulations/engine.py    # Simulation logic for 5 modes
 ├── metrics/calculator.py    # ICR formula + cost calculations
 ├── visuals/charts.py        # Plotly chart builders
 ├── examples/

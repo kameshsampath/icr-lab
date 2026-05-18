@@ -124,6 +124,15 @@ def _simulate(
     return _build_result(mode, _base_tokens(task), operations, round_specs)
 
 
+_OVER_COMPRESSED_ROUNDS = [
+    (0.8, 0.6, "Over-compressed intent — system misinterprets scope"),
+    (2.5, 1.5, "Correction: user explains what was missed"),
+    (3.0, 2.0, "Re-correction: implicit constraints not captured"),
+    (4.0, 2.5, "Full restatement with explicit ordering and dependencies"),
+    (2.0, 2.0, "Final execution after accumulated corrections"),
+]
+
+
 # Mode registry
 SIMULATION_MODES = {
     "Verbose Prompting": lambda t, ops: _simulate(
@@ -137,6 +146,9 @@ SIMULATION_MODES = {
     ),
     "Intent-Optimized": lambda t, ops: _simulate(
         "Intent-Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
+    ),
+    "Over-Compressed": lambda t, ops: _simulate(
+        "Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
     ),
 }
 

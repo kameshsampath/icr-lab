@@ -185,9 +185,9 @@ st.divider()
 st.subheader("Relative ICR Scores")
 best_mode = max(metrics, key=lambda m: m.icr_score)
 st.success(f"**Best: {best_mode.mode}** — ICR score {best_mode.icr_score:.2f}")
-st.caption(
-    "Each mode's ICR is divided by the best mode's ICR: "
-    "1.0 = most token-efficient, 0.5 = uses 2\u00d7 more tokens per operation, etc."
+st.latex(
+    r"\text{Relative ICR} = \frac{\text{Mode ICR}}{\text{Best Mode ICR}}"
+    r"\quad \Rightarrow \quad 1.0 = \text{most efficient},\ 0.5 = 2\times\text{ more tokens per op}"
 )
 st.plotly_chart(icr_gauge_chart(metrics), width="stretch")
 

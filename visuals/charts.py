@@ -156,15 +156,18 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
             ),
         ), row=1, col=i + 1)
 
-    # Add mode labels below each gauge
+    # Add mode labels below each gauge, centered on each subplot domain
     for i, m in enumerate(metrics):
         is_best = m.icr_score == best_score
         title_text = f"{'⭐ ' if is_best else ''}{m.mode}"
-        x_pos = (i + 0.5) / n
+        # Get the subplot domain to find its center x position
+        domain = fig.get_subplot(1, i + 1)
+        x_center = (domain.x[0] + domain.x[1]) / 2
         fig.add_annotation(
             text=title_text,
-            x=x_pos, y=-0.15,
+            x=x_center, y=-0.15,
             xref="paper", yref="paper",
+            xanchor="center",
             showarrow=False,
             font=dict(size=12),
         )

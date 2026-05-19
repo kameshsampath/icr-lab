@@ -10,7 +10,9 @@ from pathlib import Path
 import streamlit as st
 
 # Add project root to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 # --- Navigation (hidden from sidebar — pages use inline nav links) ---
 home_page = st.Page("pages/home.py", title="Home", icon="🏠", default=True)

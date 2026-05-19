@@ -6,7 +6,9 @@ from pathlib import Path
 import streamlit as st
 
 # Add project root to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 from examples.sample_tasks import SAMPLE_TASKS, get_operations_count
 from metrics.calculator import compute_metrics, compute_savings

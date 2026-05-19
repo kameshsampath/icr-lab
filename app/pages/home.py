@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from examples.sample_tasks import SAMPLE_TASKS, get_operations_count
 from metrics.calculator import compute_metrics, compute_savings
-from simulations.engine import SIMULATION_MODES, run_simulation
+from simulations.engine import SIMULATION_MODES, run_simulation, apply_output_compression
 from visuals.charts import (
     cumulative_growth_chart,
     efficiency_dataframe,
@@ -56,6 +56,24 @@ with st.sidebar:
         default=list(SIMULATION_MODES.keys()),
         help="Select which interaction modes to compare",
     )
+
+    st.divider()
+
+    # Output compression toggle
+    st.markdown("**Output Compression**")
+    apply_compression = st.toggle(
+        "Caveman-style compression",
+        value=False,
+        help="Simulates terse AI responses (~35% output token reduction). Shows how output brevity interacts with interaction architecture.",
+    )
+    if apply_compression:
+        compression_factor = st.slider(
+            "Compression factor",
+            min_value=0.30, max_value=1.0, value=0.65, step=0.05,
+            help="1.0 = no compression, 0.65 = Caveman default (~35% reduction)",
+        )
+    else:
+        compression_factor = 1.0
 
     st.divider()
 
@@ -116,6 +134,8 @@ if not run_clicked and "results" not in st.session_state:
 if run_clicked:
     operations = get_operations_count(task_input)
     results = run_simulation(task_input, operations, selected_modes)
+    if compression_factor < 1.0:
+        results = apply_output_compression(results, compression_factor)
     metrics = compute_metrics(results)
     savings = compute_savings(metrics)
 
@@ -178,6 +198,14 @@ if worst_mode.token_amplification > 1.0:
     st.info(
         f"**{worst_mode.mode}** uses **{worst_mode.token_amplification:.1f}x** more tokens "
         f"than the most efficient mode for the same intent."
+    )
+
+# --- Compression insight ---
+if compression_factor < 1.0:
+    st.success(
+        f"**Output compression ({int((1 - compression_factor) * 100)}% reduction) applied.** "
+        f"Architecture gap remains **{worst_mode.token_amplification:.1f}x**. "
+        f"Compression helps — but interaction architecture is the bigger lever."
     )
 
 st.divider()

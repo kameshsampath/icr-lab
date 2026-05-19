@@ -10,6 +10,7 @@ The main demo is titled **ICR and Token Economics** — an interactive Streamlit
 
 - **Relative ICR Scores** — Normalized 0-100% comparison across interaction modes. The most efficient mode scores 100%; others are scored relative to it.
 - **Token Amplification Factor** — How many extra tokens a less-efficient mode consumes for the same intent (e.g., "Verbose Prompting uses 7.0x more tokens").
+- **Output Compression Toggle** — Simulate Caveman-style output brevity to show that compression compounds with good architecture but doesn't replace it.
 - **Prompt Comparison** — Side-by-side view of verbose vs. intent-optimized prompts achieving identical outcomes.
 - **Help / Glossary** — Built-in reference page explaining ICR, token amplification, relative scores, token economics, and why v1 uses simulation instead of live LLM calls.
 
@@ -95,6 +96,7 @@ ICR Lab is part of a broader exploration of intent-native software systems.
 - [The Ghost in the Machine: Why AI Needs the Spirit of UML](https://blogs.kameshs.dev/the-ghost-in-the-machine-why-ai-needs-the-spirit-of-uml-0d8864e583e2)
 - [Intent Driven Development: The Shift Developers Can't Ignore](https://blogs.kameshs.dev/intent-driven-development-the-shift-developers-cant-ignore-ef434f94d56c)
 - [Intent Compression Ratio: Measuring the Power of Intent](https://blogs.kameshs.dev/intent-compression-ratio-measuring-the-power-of-intent-ceb6faf2e2f9)
+- [Caveman](https://github.com/juliusbrussee/caveman) — Output token compression ("why use many token when few do trick")
 
 ## License
 

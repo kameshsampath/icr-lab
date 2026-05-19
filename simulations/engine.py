@@ -153,6 +153,54 @@ SIMULATION_MODES = {
 }
 
 
+def apply_output_compression(
+    results: list[SimulationResult], factor: float
+) -> list[SimulationResult]:
+    """Apply output compression to all results (simulates Caveman-style terse responses).
+
+    Args:
+        results: List of SimulationResult from run_simulation.
+        factor: Multiplier for output tokens (0.65 = 35% reduction).
+
+    Returns:
+        New list of SimulationResult with compressed output tokens.
+    """
+    if factor >= 1.0:
+        return results
+
+    compressed = []
+    for r in results:
+        new_rounds = []
+        cumulative = 0
+        for rd in r.rounds:
+            new_out = int(rd.output_tokens * factor)
+            cumulative += rd.input_tokens + new_out
+            new_rounds.append(
+                InteractionRound(
+                    round_number=rd.round_number,
+                    input_tokens=rd.input_tokens,
+                    output_tokens=new_out,
+                    cumulative_tokens=cumulative,
+                    description=rd.description,
+                    prompt_text=rd.prompt_text,
+                )
+            )
+        total_input = sum(rd.input_tokens for rd in new_rounds)
+        total_output = sum(rd.output_tokens for rd in new_rounds)
+        compressed.append(
+            SimulationResult(
+                mode=r.mode,
+                rounds=new_rounds,
+                total_input_tokens=total_input,
+                total_output_tokens=total_output,
+                total_tokens=total_input + total_output,
+                operations_achieved=r.operations_achieved,
+                optimized_prompt=r.optimized_prompt,
+            )
+        )
+    return compressed
+
+
 def run_simulation(
     task: str, operations: int, modes: list[str] | None = None
 ) -> list[SimulationResult]:

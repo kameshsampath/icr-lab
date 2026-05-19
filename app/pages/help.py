@@ -121,6 +121,17 @@ st.markdown(
 
 st.divider()
 
+st.subheader("Output Compression")
+st.markdown(
+    "Output compression reduces the verbosity of AI responses without losing technical accuracy. "
+    "Tools like [Caveman](https://github.com/juliusbrussee/caveman) achieve ~65% output token reduction. "
+    "ICR Lab lets you simulate this to show that output compression compounds with good interaction "
+    "architecture but does not replace it. The architecture gap often *widens* with compression because "
+    "efficient modes have a higher output-to-input ratio and benefit more."
+)
+
+st.divider()
+
 st.subheader("Intent Fulfilled")
 st.markdown(
     "Intent fulfilled is a simplified score used by the simulation to represent "
@@ -171,6 +182,7 @@ st.markdown(
     "- [ICR Lab GitHub repo](https://github.com/kameshsampath/icr-lab)\n"
     "- [Live app](https://icr-lab.streamlit.app/)\n"
     "- [ICR: Measuring the Power of Intent](https://blogs.kameshs.dev/intent-compression-ratio-measuring-the-power-of-intent-ceb6faf2e2f9)\n"
+    "- [Caveman](https://github.com/juliusbrussee/caveman) — output token compression for AI agents\n"
     "- [Streamlit documentation](https://docs.streamlit.io/)\n"
     "- [Streamlit Community Cloud](https://streamlit.io/cloud)\n"
     "- [Snowflake Cortex documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions) "

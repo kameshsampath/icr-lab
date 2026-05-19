@@ -136,24 +136,23 @@ if not run_clicked and "results" not in st.session_state:
 if run_clicked:
     operations = get_operations_count(task_input)
     results = run_simulation(task_input, operations, selected_modes)
-    if compression_factor < 1.0:
-        results = apply_output_compression(results, compression_factor)
-    metrics = compute_metrics(results)
-    savings = compute_savings(metrics)
 
-    # Store in session state
+    # Store uncompressed results in session state
     st.session_state["results"] = results
-    st.session_state["metrics"] = metrics
-    st.session_state["savings"] = savings
     st.session_state["task"] = task_input
     st.session_state["operations"] = operations
 
 # Retrieve from session state
 results = st.session_state["results"]
-metrics = st.session_state["metrics"]
-savings = st.session_state["savings"]
 task = st.session_state["task"]
 operations = st.session_state["operations"]
+
+# Apply compression reactively (slider updates without re-running simulation)
+if compression_factor < 1.0:
+    results = apply_output_compression(results, compression_factor)
+
+metrics = compute_metrics(results)
+savings = compute_savings(metrics)
 
 # --- Task Context ---
 st.markdown(f"**Task:** {task}")

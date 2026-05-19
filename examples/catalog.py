@@ -466,6 +466,239 @@ EXAMPLES = [
             "Over-Compressed": "Harden the Linux servers.",
         },
     },
+    {
+        "task": "Create a Snowflake Native App with versioned data sharing",
+        "operations": [
+            "Create application package",
+            "Write manifest.yml",
+            "Create setup scripts",
+            "Define secure shared views",
+            "Add row access policies",
+            "Create Streamlit UI component",
+            "Configure v1 release directive",
+            "Set up consumer grants",
+            "Define upgrade policy",
+            "Create v2 with backward compatibility",
+            "Test consumer upgrade path",
+        ],
+        "prompts": {
+            "Verbose Prompting": (
+                "I need to create a Snowflake Native App. This means I need to set up an application "
+                "package with versioned release directives. The app should share data with consumers "
+                "through secure views. I want the provider to define the manifest.yml, setup scripts, "
+                "and the README. The data sharing should use versioning so consumers can upgrade between "
+                "versions. Please make sure the application package has proper grants, the shared data is "
+                "protected by row access policies, and there's a streamlit UI component for consumers. "
+                "Also configure the upgrade policy and ensure backward compatibility between v1 and v2 "
+                "of the shared data model."
+            ),
+            "Clarification Heavy": [
+                "I want to create a Native App in Snowflake.",
+                "What kind of Native App? Provider or consumer side?",
+                "Provider side. It should share data.",
+                "What kind of data sharing — direct share or via the app?",
+                "Via the app with versioned releases.",
+                "Do you need a Streamlit UI in the app?",
+                "Yes, and row access policies on shared views.",
+                "Got it — creating app package with manifest, setup scripts, versioned shares, RAP, and Streamlit component.",
+            ],
+            "Context-Aware": (
+                "Create Snowflake Native App: provider-side application package with v1/v2 versioned "
+                "release directives, secure shared views with row access policies, Streamlit UI "
+                "component, and consumer upgrade path."
+            ),
+            "Intent-Optimized": (
+                "native-app provider: app-pkg versioned(v1→v2), secure-views+RAP, streamlit-ui, consumer-upgrade-path"
+            ),
+            "Over-Compressed": "Create native app.",
+        },
+    },
+    {
+        "task": "Set up Cortex ML functions for sentiment analysis pipeline",
+        "operations": [
+            "Identify Cortex sentiment function",
+            "Create staging table schema",
+            "Create results table",
+            "Write sentiment processing query",
+            "Handle NULL text values",
+            "Create scheduled task (hourly)",
+            "Create aggregation view by category",
+        ],
+        "prompts": {
+            "Verbose Prompting": (
+                "I want to set up a sentiment analysis pipeline using Snowflake Cortex ML functions. "
+                "First, I need to identify the right Cortex function for sentiment — I think it's "
+                "SNOWFLAKE.CORTEX.SENTIMENT(). I want to create a pipeline that takes text data from a "
+                "staging table, runs sentiment analysis on it, stores results with scores in a results "
+                "table, and then creates a scheduled task to process new rows incrementally. The pipeline "
+                "should handle NULL text values gracefully, log any processing errors, and the task should "
+                "run every hour. Also create a view that aggregates sentiment scores by category."
+            ),
+            "Clarification Heavy": [
+                "Help me set up sentiment analysis in Snowflake.",
+                "Are you using Cortex functions or a custom model?",
+                "Cortex functions.",
+                "Which function — SENTIMENT, CLASSIFY_TEXT, or COMPLETE?",
+                "SENTIMENT. On text data from a staging table.",
+                "Do you need batch processing or real-time?",
+                "Batch — with a scheduled task, hourly.",
+                "OK — setting up CORTEX.SENTIMENT pipeline: staging → results table, hourly task, error handling, aggregation view.",
+            ],
+            "Context-Aware": (
+                "Set up Cortex SENTIMENT pipeline: staging_table.text_col → results_table(score, label), "
+                "hourly TASK for incremental processing, handle NULLs, aggregate view by category."
+            ),
+            "Intent-Optimized": (
+                "cortex-sentiment-pipeline: staging→results, hourly-task incremental, null-safe, category-agg-view"
+            ),
+            "Over-Compressed": "Set up sentiment analysis.",
+        },
+    },
+    {
+        "task": "Configure Snowflake dynamic tables with incremental refresh",
+        "operations": [
+            "Create source table with Snowpipe ingestion",
+            "Create DT1 for deduplication (lag=1min)",
+            "Create DT2 for aggregation (lag=5min)",
+            "Create DT3 for dimensional model (lag=10min)",
+            "Configure incremental refresh",
+            "Set up refresh history monitoring",
+            "Create lag breach alert (2x target)",
+            "Validate pipeline end-to-end",
+        ],
+        "prompts": {
+            "Verbose Prompting": (
+                "I need to configure dynamic tables in Snowflake with incremental refresh. I have a "
+                "source table that gets new rows appended via Snowpipe. I want to create a chain of "
+                "dynamic tables: first one does deduplication, second one does aggregation, third one "
+                "creates a dimensional model. Each should use incremental refresh where possible to "
+                "minimize compute. I need to set appropriate target lag — probably 1 minute for the "
+                "first, 5 minutes for the second, and downstream can be 10 minutes. Also make sure to "
+                "monitor refresh history and set up alerts if lag exceeds 2x the target."
+            ),
+            "Clarification Heavy": [
+                "I want to use dynamic tables.",
+                "For what use case — ETL, materialization, or streaming?",
+                "ETL pipeline from Snowpipe source.",
+                "How many layers of dynamic tables?",
+                "Three — dedup, aggregate, dimensional.",
+                "What refresh lag for each?",
+                "1min, 5min, 10min downstream.",
+                "Should I add monitoring?",
+                "Yes, alert if lag exceeds 2x target.",
+            ],
+            "Context-Aware": (
+                "Configure 3-layer dynamic table pipeline (source via Snowpipe): DT1 dedup (lag=1min) → "
+                "DT2 aggregate (lag=5min) → DT3 dimensional (lag=10min). Incremental refresh, monitor "
+                "refresh history, alert on 2x lag breach."
+            ),
+            "Intent-Optimized": (
+                "dynamic-tables 3-layer: snowpipe→dedup(1m)→agg(5m)→dim(10m), incremental, alert@2x-lag"
+            ),
+            "Over-Compressed": "Set up dynamic tables.",
+        },
+    },
+    {
+        "task": "Deploy a Snowpark Container Services job with GPU compute",
+        "operations": [
+            "Create compute pool (GPU_NV_S)",
+            "Create image repository",
+            "Build Docker container",
+            "Push to Snowflake image registry",
+            "Write service spec YAML",
+            "Configure GPU resource requests",
+            "Set up network policy",
+            "Grant stage and table access",
+            "Deploy job service",
+            "Verify job completion and results",
+        ],
+        "prompts": {
+            "Verbose Prompting": (
+                "I want to deploy a container job on Snowpark Container Services that uses GPU compute. "
+                "I need to create a compute pool with GPU nodes — probably GPU_NV_S for the workload. "
+                "Then I need to build a Docker container that runs a Python ML inference script, push it "
+                "to the Snowflake image registry, create a service spec YAML that requests GPU resources, "
+                "and deploy it as a job service. The job should read data from an internal stage, process "
+                "it through the model, and write results back to a table. I also need to set up the image "
+                "repository, configure network policies for the container, and make sure the job has "
+                "proper role grants to access the stage and table."
+            ),
+            "Clarification Heavy": [
+                "I want to run a GPU container job in Snowflake.",
+                "Using Snowpark Container Services?",
+                "Yes.",
+                "What GPU type do you need?",
+                "GPU_NV_S should work.",
+                "What does the container do?",
+                "ML inference — reads from stage, writes to table.",
+                "Do you need persistent service or one-off job?",
+                "Job service — runs and completes.",
+                "I'll set up: compute pool (GPU_NV_S), image repo, container build+push, job spec, stage/table grants.",
+            ],
+            "Context-Aware": (
+                "Deploy SPCS GPU job: compute pool (GPU_NV_S), image repo + Docker build, job service "
+                "spec requesting GPU, reads @stage → ML inference → writes results table. Network "
+                "policy + role grants."
+            ),
+            "Intent-Optimized": (
+                "spcs-gpu-job: pool(GPU_NV_S), docker→image-repo, job-spec gpu, @stage→inference→table, net-policy+grants"
+            ),
+            "Over-Compressed": "Run GPU container job.",
+        },
+    },
+    {
+        "task": "Build a Snowflake data mesh with governance policies",
+        "operations": [
+            "Create domain databases (sales, marketing, product)",
+            "Create governance database",
+            "Create GOVERNANCE_ADMIN role",
+            "Create DOMAIN_OWNER roles per domain",
+            "Create DOMAIN_READER roles per domain",
+            "Implement tag-based masking policies",
+            "Add row access policies",
+            "Configure Horizon auto-classification for PII",
+            "Set up object tagging",
+            "Create cross-domain access workflow",
+            "Build access request stored procedure",
+            "Test cross-domain access flow",
+        ],
+        "prompts": {
+            "Verbose Prompting": (
+                "I want to build a data mesh architecture in Snowflake with proper governance. This means "
+                "creating separate databases for each domain (sales, marketing, product), setting up data "
+                "products as secure shares or listings within each domain, implementing governance with "
+                "tags, masking policies, row access policies, and object tagging. I need a central "
+                "governance database that holds the policy definitions and a GOVERNANCE_ADMIN role. Each "
+                "domain should have a DOMAIN_OWNER role and a DOMAIN_READER role. Cross-domain access "
+                "should go through the governance layer. Also set up Snowflake Horizon for data discovery, "
+                "apply classification tags to PII columns automatically, and create an access request "
+                "workflow using tasks and stored procedures."
+            ),
+            "Clarification Heavy": [
+                "I want to implement a data mesh in Snowflake.",
+                "How many domains?",
+                "Three: sales, marketing, product.",
+                "What governance do you need?",
+                "Tags, masking policies, row access policies.",
+                "Centralized or federated governance?",
+                "Central governance DB with domain-level ownership.",
+                "Do you need automated PII detection?",
+                "Yes, with Horizon classification.",
+                "Cross-domain access model?",
+                "Through governance layer with request workflow.",
+                "Setting up: 3 domain DBs, governance DB, role hierarchy (GOVERNANCE_ADMIN, DOMAIN_OWNER, DOMAIN_READER), policies, Horizon tags, access workflow.",
+            ],
+            "Context-Aware": (
+                "Build data mesh: 3 domain DBs (sales, marketing, product) + governance DB. Role "
+                "hierarchy (GOVERNANCE_ADMIN → DOMAIN_OWNER → DOMAIN_READER). Tag-based masking + RAP, "
+                "Horizon auto-classification for PII, cross-domain access workflow via procedures."
+            ),
+            "Intent-Optimized": (
+                "data-mesh: 3-domains+gov-db, roles(admin→owner→reader), tags+masking+RAP, horizon-pii-classify, cross-domain-access-workflow"
+            ),
+            "Over-Compressed": "Build data mesh.",
+        },
+    },
 ]
 
 

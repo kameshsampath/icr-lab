@@ -11,6 +11,11 @@ SAMPLE_TASKS = [
     "Implement a rate limiter with sliding window and distributed state",
     "Provision multi-region AWS infrastructure with DR failover",
     "Configure hardened Linux fleet with CIS benchmarks and monitoring",
+    "Create a Snowflake Native App with versioned data sharing",
+    "Set up Cortex ML functions for sentiment analysis pipeline",
+    "Configure Snowflake dynamic tables with incremental refresh",
+    "Deploy a Snowpark Container Services job with GPU compute",
+    "Build a Snowflake data mesh with governance policies",
 ]
 
 # Mapping of tasks to their estimated operation counts
@@ -26,6 +31,11 @@ TASK_OPERATIONS = {
     "Implement a rate limiter with sliding window and distributed state": 8,
     "Provision multi-region AWS infrastructure with DR failover": 10,
     "Configure hardened Linux fleet with CIS benchmarks and monitoring": 9,
+    "Create a Snowflake Native App with versioned data sharing": 11,
+    "Set up Cortex ML functions for sentiment analysis pipeline": 7,
+    "Configure Snowflake dynamic tables with incremental refresh": 8,
+    "Deploy a Snowpark Container Services job with GPU compute": 10,
+    "Build a Snowflake data mesh with governance policies": 12,
 }
 
 

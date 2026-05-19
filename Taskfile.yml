@@ -1,0 +1,29 @@
+version: "3"
+silent: true
+
+tasks:
+  setup:
+    desc: Install dependencies
+    cmd: uv sync
+
+  serve:
+    desc: Launch ICR Lab Streamlit app
+    cmd: uv run icr-lab serve
+
+  analyze:
+    desc: Run ICR analysis (pass task in CLI_ARGS)
+    cmd: uv run icr-lab analyze "{{.CLI_ARGS}}"
+
+  lint:
+    desc: Check code style with ruff
+    cmd: uv run ruff check .
+
+  format:
+    desc: Auto-format code with ruff
+    cmd: uv run ruff format .
+
+  configure:
+    desc: Validate config and test optional Snowflake connection
+    cmds:
+      - uv run python3 -c "from backends.config import validate_config; v,i = validate_config(); print('Config OK' if v else f'Issues: {i}')"
+      - snow connection test 2>/dev/null && echo "Snowflake OK" || echo "Snowflake not configured (optional)"

@@ -15,7 +15,6 @@ cortex = [
     "snowflake-snowpark-python>=1.11.0",
     "snowflake-ml-python>=1.5.0",
 ]
-lmstudio = []  # No extra deps — uses stdlib urllib
 all = [
     "icr-lab[cortex]",
 ]
@@ -33,7 +32,16 @@ packages = ["app", "backends", "simulations", "metrics", "visuals", "examples"]
 [dependency-groups]
 dev = [
     "watchdog>=6.0.0",
+    "ruff>=0.15.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/kameshsampath/icr-lab"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "N", "RUF", "PL"]
+ignore = ["PLR0913", "PLR2004"]

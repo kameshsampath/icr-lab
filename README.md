@@ -4,32 +4,24 @@
 
 A companion demo for the article [**ICR: Measuring the Power of Intent**](https://blogs.kameshs.dev/intent-compression-ratio-measuring-the-power-of-intent-ceb6faf2e2f9).
 
-The main demo is titled **ICR and Token Economics** — an interactive Streamlit simulator that shows how the same user intent produces wildly different token footprints depending on the interaction architecture.
+An interactive Streamlit simulator that shows how the same user intent produces wildly different token footprints depending on the interaction architecture.
 
 ## What It Demonstrates
 
-- **Relative ICR Scores** — Normalized 0-100% comparison across interaction modes. The most efficient mode scores 100%; others are scored relative to it.
-- **Token Amplification Factor** — How many extra tokens a less-efficient mode consumes for the same intent (e.g., "Verbose Prompting uses 7.0x more tokens").
-- **Output Compression Toggle** — Simulate Caveman-style output brevity to show that compression compounds with good architecture but doesn't replace it.
-- **Prompt Comparison** — Side-by-side view of verbose vs. intent-optimized prompts achieving identical outcomes.
-- **Help / Glossary** — Built-in reference page explaining ICR, token amplification, relative scores, token economics, and why v1 uses simulation instead of live LLM calls.
-
-## Why Simulation?
-
-v1 uses deterministic simulation rather than live LLM calls because:
-
-- **Reproducible** — Same inputs always produce the same visualization. No API variance.
-- **No API keys required** — Runs fully local, zero dependencies on external services.
-- **Fast iteration** — Instant results for 10 pre-built examples spanning Snowflake, Kubernetes, Terraform, Ansible, and general programming.
-
-The simulation models realistic token growth patterns for each interaction mode based on observed patterns from real AI system usage.
+- **Relative ICR Scores** — Normalized 0-100% comparison across interaction modes
+- **Token Amplification Factor** — How many extra tokens a less-efficient mode consumes for the same intent
+- **Output Compression Toggle** — Simulate Caveman-style output brevity
+- **Live Optimization** — Connect a real LLM backend to compress prompts
+- **Prompt Comparison** — Side-by-side verbose vs. intent-optimized prompts
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.11+
-- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+- [uv](https://docs.astral.sh/uv/) (recommended)
+- [go-task](https://taskfile.dev/) (optional, for `task` commands)
+- Snowflake CLI (optional, for cortex backend)
 
 ### Install & Run
 
@@ -37,28 +29,48 @@ The simulation models realistic token growth patterns for each interaction mode 
 git clone https://github.com/kameshsampath/icr-lab.git
 cd icr-lab
 
-# Install dependencies with uv
-uv sync
+# Install dependencies
+task setup        # or: uv sync
 
-# Run the app
-uv run streamlit run app/main.py
+# Launch the app
+task serve        # or: uv run icr-lab serve
 ```
 
 Opens at [http://localhost:8501](http://localhost:8501).
 
-### Alternative (pip)
+### CLI Commands
 
 ```bash
-pip install streamlit plotly pandas
-streamlit run app/main.py
+# Run ICR analysis on a task
+uv run icr-lab analyze "Deploy payment service with autoscaling"
+
+# Optimize a prompt
+uv run icr-lab optimize "Your verbose prompt here..."
+
+# Launch Streamlit UI
+uv run icr-lab serve
 ```
 
-## Usage
+### Live Mode (Optional)
 
-1. Select or enter a task in the sidebar
-2. Choose simulation modes to compare
-3. Click **Run Simulation**
-4. Explore: ICR gauges, token comparison, cumulative growth, prompt comparison, interaction traces
+Edit `icr-lab.toml` to configure a live LLM backend:
+
+```toml
+[backend]
+default = "cortex"
+
+[backend.cortex]
+model = "llama3.1-8b"
+connection = "default"
+```
+
+To add a third-party backend (e.g., LM Studio), run `$icr-lab scaffold-backend` in Cortex Code.
+
+Run `task configure` to validate your setup, or use `$icr-lab setup` in Cortex Code.
+
+### Deploy to Snowflake
+
+Run `$icr-lab deploy-sis` in Cortex Code to ship the app to Streamlit-in-Snowflake.
 
 ## Simulation Modes
 
@@ -66,7 +78,7 @@ streamlit run app/main.py
 |------|----------|-----------------|
 | Verbose Prompting | Large prompts with repeated context | Lowest |
 | Clarification Heavy | Multiple rounds with growing context | Low |
-| Over-Compressed | Ambiguous compressed prompt triggers correction loops | Variable (often worse than Context-Aware) |
+| Over-Compressed | Ambiguous prompt triggers correction loops | Variable |
 | Context-Aware | Structured requests with partial reuse | Moderate |
 | Intent-Optimized | Single compressed intent expression | Highest |
 
@@ -75,28 +87,42 @@ streamlit run app/main.py
 ```
 icr-lab/
 ├── app/
-│   ├── main.py              # Streamlit dashboard (main page)
-│   └── pages/help.py        # Help / Glossary page
+│   ├── main.py              # Streamlit entry point
+│   ├── _cli.py              # CLI (analyze, optimize, serve)
+│   └── pages/
+│       ├── home.py          # Main dashboard
+│       └── help.py          # Help / Glossary
+├── backends/
+│   ├── __init__.py          # Backend registry
+│   ├── base.py              # LLMBackend protocol
+│   ├── config.py            # Config loader + validation
+│   ├── simulation.py        # Deterministic simulation backend
+│   └── cortex.py            # Snowflake Cortex backend
 ├── simulations/engine.py    # Simulation logic for 5 modes
 ├── metrics/calculator.py    # ICR formula + cost calculations
 ├── visuals/charts.py        # Plotly chart builders
-├── examples/
-│   ├── catalog.py           # Full prompt examples per mode
-│   └── sample_tasks.py      # Pre-built example tasks
-├── .streamlit/config.toml   # Streamlit configuration
-├── pyproject.toml           # uv project configuration
+├── examples/                # Sample tasks + prompt catalog
+├── icr-lab.toml             # Local config (gitignored)
+├── Taskfile.yml             # Task runner commands
+├── pyproject.toml           # Project metadata + deps
 └── README.md
 ```
 
-## Related Reading
+## Development
 
-ICR Lab is part of a broader exploration of intent-native software systems.
+```bash
+task lint         # Check code style
+task format       # Auto-format
+task configure    # Validate config + test Snowflake connection
+```
+
+## Related Reading
 
 - [Infrastructure as Intent: The Field Velocity Blueprint](https://blogs.kameshs.dev/infrastructure-as-intent-the-field-velocity-blueprint-e6217ef30f14)
 - [The Ghost in the Machine: Why AI Needs the Spirit of UML](https://blogs.kameshs.dev/the-ghost-in-the-machine-why-ai-needs-the-spirit-of-uml-0d8864e583e2)
 - [Intent Driven Development: The Shift Developers Can't Ignore](https://blogs.kameshs.dev/intent-driven-development-the-shift-developers-cant-ignore-ef434f94d56c)
 - [Intent Compression Ratio: Measuring the Power of Intent](https://blogs.kameshs.dev/intent-compression-ratio-measuring-the-power-of-intent-ceb6faf2e2f9)
-- [Caveman](https://github.com/juliusbrussee/caveman) — Output token compression ("why use many token when few do trick")
+- [Caveman](https://github.com/juliusbrussee/caveman) — Output token compression
 
 ## License
 

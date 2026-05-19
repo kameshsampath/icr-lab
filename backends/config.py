@@ -15,6 +15,37 @@ except ImportError:
 
 _CONFIG_FILE = "icr-lab.toml"
 
+_SCHEMA_NAME = "icr-lab"
+_SCHEMA_VERSION = "0.2.0"
+
+_DEFAULT_CONFIG = """\
+_schema = "icr-lab"
+_version = "0.2.0"
+
+# ICR Lab Configuration
+# Section ownership: [backend*] = backends module + scaffold-backend skill
+#                    [deploy]   = deploy-sis skill
+
+[backend]
+default = "simulation"
+
+[backend.simulation]
+# Always available — deterministic engine, no external deps
+
+[backend.cortex]
+model = "llama3.1-8b"
+connection = "default"
+database = ""
+schema = ""
+
+[deploy]
+database = ""
+schema = ""
+warehouse = ""
+compute_pool = ""
+connection = ""
+"""
+
 
 def _find_config() -> Path:
     """Find icr-lab.toml starting from CWD, walking up to project root."""
@@ -126,3 +157,83 @@ def _toml_value(value) -> str:
         items = ", ".join(_toml_value(v) for v in value)
         return f"[{items}]"
     return f'"{value}"'
+
+
+def validate_config() -> tuple[bool, list[str]]:
+    """Validate icr-lab.toml structure.
+
+    Checks: parseable, _schema == 'icr-lab', [backend] exists,
+    default key points to a defined [backend.*], at least one backend section.
+    Returns (valid, issues).
+    """
+    path = _find_config()
+    issues: list[str] = []
+
+    if not path.exists():
+        return False, ["icr-lab.toml not found"]
+
+    try:
+        with open(path, "rb") as f:
+            raw = tomllib.load(f)
+    except Exception as e:
+        return False, [f"Parse error: {e}"]
+
+    # Check schema marker
+    if raw.get("_schema") != _SCHEMA_NAME:
+        issues.append(f"Missing or wrong _schema (expected '{_SCHEMA_NAME}')")
+
+    # Check backend section
+    if "backend" not in raw:
+        issues.append("Missing [backend] section")
+    elif not isinstance(raw["backend"], dict):
+        issues.append("[backend] is not a table")
+    else:
+        backend = raw["backend"]
+        default = backend.get("default", "")
+        # Check at least one backend subsection
+        subsections = [k for k, v in backend.items() if isinstance(v, dict)]
+        if not subsections:
+            issues.append("No backend subsections defined (e.g., [backend.simulation])")
+        elif default and default not in subsections:
+            issues.append(f"default '{default}' does not match any [backend.*] section")
+
+    return (len(issues) == 0, issues)
+
+
+def ensure_config(force: bool = False) -> Path:
+    """Ensure icr-lab.toml exists and is valid.
+
+    - Missing -> write _DEFAULT_CONFIG
+    - Corrupted (parse fails) -> backup .bak, write fresh
+    - Wrong schema -> backup .bak, write fresh (with warning)
+    - force=True -> unconditional overwrite (clean reset)
+    Returns path to the config file.
+    """
+    path = _find_config()
+
+    if force:
+        if path.exists():
+            path.rename(path.with_suffix(".toml.bak"))
+        path.write_text(_DEFAULT_CONFIG)
+        return path
+
+    if not path.exists():
+        path.write_text(_DEFAULT_CONFIG)
+        return path
+
+    # Try to parse
+    try:
+        with open(path, "rb") as f:
+            raw = tomllib.load(f)
+    except Exception:
+        # Corrupted — backup and rewrite
+        path.rename(path.with_suffix(".toml.bak"))
+        path.write_text(_DEFAULT_CONFIG)
+        return path
+
+    # Check schema ownership
+    if raw.get("_schema") != _SCHEMA_NAME:
+        path.rename(path.with_suffix(".toml.bak"))
+        path.write_text(_DEFAULT_CONFIG)
+
+    return path

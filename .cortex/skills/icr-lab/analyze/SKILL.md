@@ -1,10 +1,6 @@
 ---
 name: icr-lab/analyze
-description: Run ICR analysis on a task description
-triggers:
-  - analyze icr
-  - icr score
-  - token analysis
+description: "Run ICR analysis on a task description — simulate all 5 interaction modes and compare token efficiency, ICR scores, amplification factors, and estimated costs. Use when: analyzing a prompt, measuring token usage, comparing interaction architectures, benchmarking efficiency, evaluating ICR score. Triggers: analyze icr, icr score, token analysis, simulate task, compare modes, benchmark, run icr, measure tokens, evaluate efficiency, token comparison."
 ---
 
 # ICR Analyze

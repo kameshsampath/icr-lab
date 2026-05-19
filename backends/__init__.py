@@ -43,11 +43,8 @@ def _get_backend_class(name: str):
     elif name == "cortex":
         from backends.cortex import CortexBackend
         return CortexBackend
-    elif name == "lmstudio":
-        from backends.lmstudio import LMStudioBackend
-        return LMStudioBackend
     else:
-        raise ImportError(f"Unknown backend: {name}")
+        raise ImportError(f"Unknown backend: {name}. Use `$icr-lab scaffold-backend` to add it.")
 
 
 def get_backend(name: str | None = None) -> "LLMBackend":

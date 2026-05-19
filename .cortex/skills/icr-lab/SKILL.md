@@ -1,40 +1,40 @@
 ---
 name: icr-lab
-description: ICR Lab — Intent Compression Ratio analysis and optimization
-version: 0.2.0
-triggers:
-  - icr
-  - intent compression
-  - token economics
-  - optimize prompt
-  - scaffold backend
-  - deploy sis
+description: "ICR Lab — simulate, analyze, compare, and optimize Intent Compression Ratio and token economics across interaction architectures. Use when: running ICR simulations, measuring token efficiency, comparing interaction modes, compressing prompts, benchmarking token costs, setting up config, scaffolding LLM backends, deploying to Snowflake SiS. Triggers: icr, intent compression, token economics, simulate tokens, compare modes, benchmark icr, measure efficiency, optimize prompt, compress prompt, scaffold backend, deploy sis, icr-lab setup, icr-lab configure, icr-lab init."
 ---
 
 # ICR Lab Skill
 
-You are the ICR Lab assistant. Route user intent to the appropriate sub-skill:
+You are the ICR Lab assistant. Detect user intent and route to the appropriate sub-skill.
 
-## Routing
+## Intent Detection
 
-| Intent | Route to |
-|--------|----------|
-| Analyze a prompt/task for ICR score | `analyze/` |
-| Optimize/compress a verbose prompt | `optimize/` |
-| Add a new LLM backend | `scaffold-backend/` |
-| Deploy to Snowflake SiS | `deploy-sis/` |
-| General ICR questions | Answer using `reference.md` |
+| Intent | Trigger Phrases | Route |
+|--------|----------------|-------|
+| **SETUP** | "icr-lab setup", "icr-lab configure", "icr-lab init", "reset config", "fix config", "configure icr" | `setup/SKILL.md` |
+| **ANALYZE** | "analyze icr", "simulate task", "compare modes", "benchmark", "run icr", "measure tokens", "evaluate efficiency", "icr score", "token analysis" | `analyze/SKILL.md` |
+| **OPTIMIZE** | "optimize prompt", "compress prompt", "reduce tokens", "shorten prompt", "make concise", "tune prompt", "intent optimize" | `optimize/SKILL.md` |
+| **SCAFFOLD** | "scaffold backend", "add backend", "new backend", "create backend", "register backend", "integrate llm" | `scaffold-backend/SKILL.md` |
+| **DEPLOY** | "deploy sis", "deploy snowflake", "publish app", "ship to snowflake", "streamlit in snowflake" | `deploy-sis/SKILL.md` |
+
+## Routing Rules
+
+1. Match user message against trigger phrases (case-insensitive, partial match OK)
+2. If matched -> load the corresponding sub-skill and follow its workflow
+3. If ambiguous -> ask user to clarify intent
+4. If general ICR question -> answer using `reference.md`
 
 ## Quick Reference
 
-- **ICR** = (Intent Fulfilled / Total Tokens) × 1000
+- **ICR** = (Intent Fulfilled / Total Tokens) x 1000
 - Higher ICR = more useful work per token
 - The 5 simulation modes model different interaction architectures
-- Config lives in `icr-lab.toml` (TOML, section-owned)
+- Config lives in `icr-lab.toml` (TOML, section-owned, gitignored)
 - Backends registered in `[backend.*]` sections
 
-## Available Commands
+## Available Sub-Skills
 
+- `$icr-lab setup` — Initialize or repair configuration
 - `$icr-lab analyze` — Run ICR analysis on a task
 - `$icr-lab optimize` — Compress a verbose prompt to intent-optimized form
 - `$icr-lab scaffold-backend` — Generate a new LLM backend module

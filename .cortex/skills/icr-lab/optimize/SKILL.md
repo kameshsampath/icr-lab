@@ -1,11 +1,6 @@
 ---
 name: icr-lab/optimize
-description: Compress a verbose prompt to intent-optimized form
-triggers:
-  - optimize prompt
-  - compress prompt
-  - reduce tokens
-  - intent optimize
+description: "Compress a verbose or over-specified prompt into its intent-optimized equivalent — strip redundancy while preserving all operations and constraints. Use when: optimizing a prompt, reducing token usage, compressing instructions, making prompts concise. Triggers: optimize prompt, compress prompt, reduce tokens, intent optimize, shorten prompt, make concise, tune prompt, strip redundancy, minimize tokens."
 ---
 
 # ICR Optimize

@@ -1,10 +1,6 @@
 ---
 name: icr-lab/deploy-sis
-description: Deploy ICR Lab to Snowflake Streamlit-in-Snowflake
-triggers:
-  - deploy sis
-  - deploy snowflake
-  - streamlit in snowflake
+description: "Deploy ICR Lab to Snowflake Streamlit-in-Snowflake — validates config, tests connection, creates the Streamlit app object, and uploads files. Use when: deploying to Snowflake, publishing the app, shipping to production. Triggers: deploy sis, deploy snowflake, publish app, ship to snowflake, streamlit in snowflake, push to snowflake, release app."
 ---
 
 # Deploy to Streamlit-in-Snowflake (SiS)

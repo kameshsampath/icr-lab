@@ -9,3 +9,5 @@ wheels/
 # Virtual environments
 .venv
 .cortex/plans
+icr-lab.toml
+work/

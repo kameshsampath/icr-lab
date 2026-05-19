@@ -169,18 +169,24 @@ if optimize_clicked and backend_usable:
     with st.spinner(f"Optimizing with {selected_backend_name}..."):
         try:
             backend = get_backend(selected_backend_name)
-            optimize_prompt = (
-                f"Compress this task into a single intent-optimized prompt. "
-                f"Preserve all operations but remove redundancy:\n\n{task_input}"
-            )
-            result = backend.complete(optimize_prompt)
-            st.session_state["live_optimization"] = {
-                "original": task_input,
-                "optimized": result.text,
-                "input_tokens": result.input_tokens,
-                "output_tokens": result.output_tokens,
-                "backend": selected_backend_name,
-            }
+            if selected_backend_name == "cortex" and not backend.is_available():
+                st.error(
+                    "Snowflake connection failed. "
+                    "Run `snow connection test` or use `$icr-lab setup` to configure."
+                )
+            else:
+                optimize_prompt = (
+                    f"Compress this task into a single intent-optimized prompt. "
+                    f"Preserve all operations but remove redundancy:\n\n{task_input}"
+                )
+                result = backend.complete(optimize_prompt)
+                st.session_state["live_optimization"] = {
+                    "original": task_input,
+                    "optimized": result.text,
+                    "input_tokens": result.input_tokens,
+                    "output_tokens": result.output_tokens,
+                    "backend": selected_backend_name,
+                }
         except Exception as e:
             st.error(f"Backend error: {e}")
 

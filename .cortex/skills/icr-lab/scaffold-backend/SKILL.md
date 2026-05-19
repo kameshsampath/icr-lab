@@ -141,6 +141,37 @@ elif name == "{{name}}":
 # Configuration keys here
 ```
 
+## Skill & Extension Paths by Platform
+
+Each LLM coding platform has its own location for reusable skills/extensions:
+
+| Platform | Concept | Discovery Path | Config |
+|----------|---------|----------------|--------|
+| **Cortex Code** | Skills | `.cortex/skills/` (project), `~/.cortex/skills/` (user), bundled in install | `cortex skill list` |
+| **Claude Code** | Commands | `.claude/commands/` (project), `~/.claude/commands/` (user) | Built-in |
+| **Codex (OpenAI)** | Instructions | `.codex/` (project instructions) | `codex --instructions` |
+| **Gemini** | Rules | `.gemini/` (project rules) | Built-in |
+| **Cursor** | Rules | `.cursor/rules/` (project) | `.cursorrules` |
+| **Windsurf** | Rules | `.windsurfrules` (project) | Built-in |
+
+### What this means for ICR Lab
+
+When skill matching runs with a non-Cortex backend, the matched skills are **Cortex Code skills**.
+Other platforms have equivalent concepts:
+- A `$openflow` skill in Cortex Code ≈ a custom command in Claude Code
+- The ICR benefit applies across platforms — any reusable pattern eliminates repetition
+
+### Adding platform-specific skill discovery
+
+To discover skills for a backend other than Cortex, add the discovery logic to
+`metrics/skill_matcher.py`. Example for Claude Code:
+```python
+def _discover_claude_commands() -> list[dict]:
+    """Find .claude/commands/ markdown files."""
+    commands_dir = Path.cwd() / ".claude" / "commands"
+    ...
+```
+
 ## Validation
 
 After scaffolding, verify:

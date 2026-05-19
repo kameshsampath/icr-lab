@@ -12,7 +12,7 @@ class CortexBackend:
 
     name: str = "cortex"
 
-    def __init__(self, model: str = "llama3.1-8b", connection: str = "default", **kwargs):
+    def __init__(self, model: str = "claude-4-sonnet", connection: str = "default", **kwargs):
         self.model = model
         self.connection = connection
         self._session = None
@@ -21,11 +21,11 @@ class CortexBackend:
         if self._session is None:
             try:
                 from snowflake.snowpark import Session
+
                 self._session = Session.builder.config("connection_name", self.connection).create()
             except ImportError:
                 logger.error(
-                    "snowflake-snowpark-python is not installed. "
-                    "Run: uv sync --extra cortex"
+                    "snowflake-snowpark-python is not installed. Run: uv sync --extra cortex"
                 )
                 raise ConnectionError(
                     "snowflake-snowpark-python not installed. Run: uv sync --extra cortex"

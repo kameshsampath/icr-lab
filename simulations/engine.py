@@ -7,6 +7,8 @@ showing how interaction architecture affects token consumption.
 import hashlib
 from dataclasses import dataclass
 
+import streamlit as st
+
 
 @dataclass
 class InteractionRound:
@@ -135,21 +137,15 @@ _OVER_COMPRESSED_ROUNDS = [
 
 # Mode registry
 SIMULATION_MODES = {
-    "Verbose Prompting": lambda t, ops: _simulate(
-        "Verbose Prompting", t, ops, _VERBOSE_ROUNDS
-    ),
+    "Verbose Prompting": lambda t, ops: _simulate("Verbose Prompting", t, ops, _VERBOSE_ROUNDS),
     "Clarification Heavy": lambda t, ops: _simulate(
         "Clarification Heavy", t, ops, _clarification_rounds(t)
     ),
-    "Context-Aware": lambda t, ops: _simulate(
-        "Context-Aware", t, ops, _CONTEXT_AWARE_ROUNDS
-    ),
+    "Context-Aware": lambda t, ops: _simulate("Context-Aware", t, ops, _CONTEXT_AWARE_ROUNDS),
     "Intent-Optimized": lambda t, ops: _simulate(
         "Intent-Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
     ),
-    "Over-Compressed": lambda t, ops: _simulate(
-        "Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
-    ),
+    "Over-Compressed": lambda t, ops: _simulate("Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS),
 }
 
 
@@ -201,6 +197,7 @@ def apply_output_compression(
     return compressed
 
 
+@st.cache_data(show_spinner=False)
 def run_simulation(
     task: str, operations: int, modes: list[str] | None = None
 ) -> list[SimulationResult]:
@@ -214,7 +211,7 @@ def run_simulation(
     Returns:
         List of SimulationResult objects.
     """
-    from examples.catalog import get_optimized_prompt, get_prompt_for_mode
+    from examples.catalog import get_optimized_prompt, get_prompt_for_mode  # noqa: PLC0415
 
     if modes is None:
         modes = list(SIMULATION_MODES.keys())
@@ -234,12 +231,9 @@ def run_simulation(
                     if i < len(prompt_data):
                         round_obj.prompt_text = prompt_data[i]
                     else:
-                        round_obj.prompt_text = (
-                            f"(continued clarification round {i + 1})"
-                        )
-            elif isinstance(prompt_data, str):
-                if result.rounds:
-                    result.rounds[0].prompt_text = prompt_data
+                        round_obj.prompt_text = f"(continued clarification round {i + 1})"
+            elif isinstance(prompt_data, str) and result.rounds:
+                result.rounds[0].prompt_text = prompt_data
 
             results.append(result)
     return results

@@ -94,13 +94,19 @@ def cumulative_growth_chart(results: list[SimulationResult]) -> go.Figure:
         ))
 
     fig.update_layout(
-        title="Cumulative Token Growth",
         xaxis_title="Interaction Round",
         yaxis_title="Cumulative Tokens",
         template="plotly_white",
-        height=400,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=60, r=20, t=60, b=60),
+        height=420,
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.15,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=11),
+        ),
+        margin=dict(l=60, r=20, t=20, b=80),
     )
 
     fig.update_xaxes(dtick=1)

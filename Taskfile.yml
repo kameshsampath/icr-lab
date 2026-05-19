@@ -25,5 +25,6 @@ tasks:
   configure:
     desc: Validate config and test optional Snowflake connection
     cmds:
-      - uv run python3 -c "from backends.config import validate_config; v,i = validate_config(); print('Config OK' if v else f'Issues: {i}')"
-      - snow connection test 2>/dev/null && echo "Snowflake OK" || echo "Snowflake not configured (optional)"
+      - |
+        uv run python3 -c "from backends.config import validate_config; v,i = validate_config(); print('Config OK' if v else f'Issues: {i}')"
+        snow connection test 2>/dev/null && echo "Snowflake OK" || echo "Snowflake not configured (optional)"

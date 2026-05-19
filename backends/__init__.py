@@ -1,10 +1,14 @@
 """LLM Backend registry for ICR Lab.
 
-Reads available backends from icr-lab.toml [backend.*] sections.
+Reads available backends from icr-lab.toml [icr-lab.backend.*] sections.
 """
+
+import logging
 
 from backends.base import CompletionResult, LLMBackend
 from backends.config import load_config
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["CompletionResult", "LLMBackend", "get_backend", "list_backends"]
 
@@ -29,8 +33,10 @@ def list_backends() -> list[tuple[str, bool, str]]:
             _get_backend_class(name)
             results.append((name, True, "available"))
         except ImportError as e:
+            logger.warning("Backend '%s' unavailable (import error): %s", name, e)
             results.append((name, False, str(e)))
         except Exception as e:
+            logger.error("Backend '%s' failed to load: %s", name, e, exc_info=True)
             results.append((name, False, f"error: {e}"))
     return results
 

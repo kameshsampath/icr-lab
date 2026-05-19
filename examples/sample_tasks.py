@@ -1,5 +1,7 @@
 """Pre-built example tasks for ICR Lab simulations."""
 
+from pathlib import Path
+
 SAMPLE_TASKS = [
     "Deploy a connector with Snowflake Openflow",
     "Deploy payment service with autoscaling and observability",
@@ -17,6 +19,23 @@ SAMPLE_TASKS = [
     "Deploy a Snowpark Container Services job with GPU compute",
     "Build a Snowflake data mesh with governance policies",
 ]
+
+# Verbose tasks loaded from files in examples/verbose/
+_VERBOSE_DIR = Path(__file__).parent / "verbose"
+
+
+def load_verbose_tasks() -> list[dict[str, str]]:
+    """Load verbose task examples from .md/.txt files in examples/verbose/."""
+    tasks = []
+    if _VERBOSE_DIR.exists():
+        for f in sorted(_VERBOSE_DIR.glob("*")):
+            if f.suffix in (".md", ".txt"):
+                label = f"[Verbose] {f.stem.replace('-', ' ').title()}"
+                tasks.append({"label": label, "text": f.read_text().strip(), "path": str(f)})
+    return tasks
+
+
+VERBOSE_TASKS = load_verbose_tasks()
 
 # Mapping of tasks to their estimated operation counts
 # (used to derive complexity for simulation)

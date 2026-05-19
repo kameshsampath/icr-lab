@@ -254,6 +254,7 @@ with col_right:
             ),
         },
     )
+    st.caption("Est. Cost based on $0.01/1K input tokens, $0.03/1K output tokens.")
 
 # --- Prompt Comparison ---
 st.divider()

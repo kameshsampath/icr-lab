@@ -6,6 +6,8 @@ Sections are owned by specific modules/skills:
   - [deploy]: deploy-sis skill
 """
 
+import os
+import subprocess
 from pathlib import Path
 
 try:
@@ -18,7 +20,7 @@ _CONFIG_FILE = "icr-lab.toml"
 _SCHEMA_NAME = "icr-lab"
 _SCHEMA_VERSION = "0.2.0"
 
-_DEFAULT_CONFIG = """\
+_DEFAULT_CONFIG_TEMPLATE = """\
 _schema = "icr-lab"
 _version = "0.2.0"
 
@@ -35,16 +37,53 @@ default = "simulation"
 [backend.cortex]
 model = "llama3.1-8b"
 connection = "default"
-database = ""
-schema = ""
+database = "{prefix}_ICR_LAB"
+schema = "PUBLIC"
 
 [deploy]
-database = ""
-schema = ""
+database = "{prefix}_ICR_LAB"
+schema = "PUBLIC"
 warehouse = ""
 compute_pool = ""
 connection = ""
 """
+
+
+def _get_snowflake_user() -> str:
+    """Resolve the Snowflake username for config defaults.
+
+    Tries (in order):
+    1. SNOWFLAKE_USER env var
+    2. `snow connection status` to get current user
+    3. OS username as fallback
+    """
+    user = os.environ.get("SNOWFLAKE_USER", "")
+    if user:
+        return user.upper()
+
+    try:
+        result = subprocess.run(
+            ["snow", "connection", "status", "--format", "json"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            import json
+            data = json.loads(result.stdout)
+            user = data.get("User", "") or data.get("user", "")
+            if user:
+                return user.upper()
+    except (FileNotFoundError, subprocess.TimeoutExpired, Exception):
+        pass
+
+    return os.environ.get("USER", "user").upper()
+
+
+def _render_default_config() -> str:
+    """Render the default config template with the user prefix."""
+    prefix = _get_snowflake_user()
+    return _DEFAULT_CONFIG_TEMPLATE.format(prefix=prefix)
 
 
 def _find_config() -> Path:
@@ -203,7 +242,7 @@ def validate_config() -> tuple[bool, list[str]]:
 def ensure_config(force: bool = False) -> Path:
     """Ensure icr-lab.toml exists and is valid.
 
-    - Missing -> write _DEFAULT_CONFIG
+    - Missing -> write _render_default_config() (with user prefix)
     - Corrupted (parse fails) -> backup .bak, write fresh
     - Wrong schema -> backup .bak, write fresh (with warning)
     - force=True -> unconditional overwrite (clean reset)
@@ -214,11 +253,11 @@ def ensure_config(force: bool = False) -> Path:
     if force:
         if path.exists():
             path.rename(path.with_suffix(".toml.bak"))
-        path.write_text(_DEFAULT_CONFIG)
+        path.write_text(_render_default_config())
         return path
 
     if not path.exists():
-        path.write_text(_DEFAULT_CONFIG)
+        path.write_text(_render_default_config())
         return path
 
     # Try to parse
@@ -228,12 +267,12 @@ def ensure_config(force: bool = False) -> Path:
     except Exception:
         # Corrupted — backup and rewrite
         path.rename(path.with_suffix(".toml.bak"))
-        path.write_text(_DEFAULT_CONFIG)
+        path.write_text(_render_default_config())
         return path
 
     # Check schema ownership
     if raw.get("_schema") != _SCHEMA_NAME:
         path.rename(path.with_suffix(".toml.bak"))
-        path.write_text(_DEFAULT_CONFIG)
+        path.write_text(_render_default_config())
 
     return path

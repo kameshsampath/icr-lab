@@ -39,3 +39,14 @@ You are the ICR Lab assistant. Detect user intent and route to the appropriate s
 - `$icr-lab optimize` — Compress a verbose prompt to intent-optimized form
 - `$icr-lab scaffold-backend` — Generate a new LLM backend module
 - `$icr-lab deploy-sis` — Deploy the app to Snowflake Streamlit-in-Snowflake
+
+## Future: LMStudio Local Skill Matching
+
+When LMStudio is added as a backend, use it for skill matching LLM calls
+instead of consuming tokens on paid backends. Planned approach:
+
+1. Embed the optimized task intent via `nomic-embed-text-v1.5` (`/v1/embeddings`)
+2. Embed all skill descriptions from the catalog (cache embeddings)
+3. Cosine similarity → top-k skill candidates (threshold >= 0.5)
+4. Optional: rerank with a small Qwen model via `/v1/chat/completions`
+5. LMStudio becomes the preferred backend for skill matching calls (free, local, fast)

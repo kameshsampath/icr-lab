@@ -202,11 +202,21 @@ def _discover_skill_frontmatter() -> list[dict]:
     if live_skills:
         for skill in live_skills:
             skill_path = Path(skill["path"])
-            # Check for SKILL.md in the skill directory and subdirectories
-            for skill_md in [skill_path / "SKILL.md", *skill_path.glob("*/SKILL.md")]:
+            # Top-level SKILL.md
+            top_skill_md = skill_path / "SKILL.md"
+            if top_skill_md.exists():
+                info = parse_skill_frontmatter(top_skill_md)
+                if info and info["name"] not in seen_names:
+                    info["type"] = skill["type"]
+                    info["parent"] = None
+                    seen_names.add(info["name"])
+                    skills_info.append(info)
+            # Sub-skill SKILL.md files (one level deep)
+            for skill_md in skill_path.glob("*/SKILL.md"):
                 info = parse_skill_frontmatter(skill_md)
                 if info and info["name"] not in seen_names:
                     info["type"] = skill["type"]
+                    info["parent"] = skill["name"]
                     seen_names.add(info["name"])
                     skills_info.append(info)
         if skills_info:
@@ -256,6 +266,8 @@ def match_skills_with_llm(text: str, skills_info: list[dict], backend) -> list[d
 
     # Build allowlist of valid skill names from catalog
     valid_skill_names = {s["name"] for s in skills_info}
+    # Lookup parent skill name for sub-skills
+    parent_lookup = {s["name"]: s.get("parent") for s in skills_info}
 
     prompt = (
         "You are a deterministic skill matching engine for "
@@ -319,16 +331,20 @@ def match_skills_with_llm(text: str, skills_info: list[dict], backend) -> list[d
             # Reject hallucinated skills not in the catalog
             if skill_name not in valid_skill_names:
                 continue
+            # Compute ICR estimate from confidence (higher confidence = more ops covered)
+            ops_estimate = int(confidence * 10)
+            icr_est = f"~1:{ops_estimate}" if ops_estimate > 0 else "N/A"
             suggestions.append(
                 {
                     "skill": f"${skill_name}",
                     "match_count": int(confidence * 10),
                     "total_patterns": 10,
                     "matched_patterns": [m.get("reason", "LLM match")],
-                    "icr_estimate": "LLM",
-                    "domain_ops": 0,
+                    "icr_estimate": icr_est,
+                    "domain_ops": ops_estimate,
                     "confidence": confidence,
                     "source": "llm",
+                    "parent": parent_lookup.get(skill_name),
                 }
             )
 
@@ -436,14 +452,29 @@ def match_skills(text: str, backend_name: str | None = None) -> list[dict]:  # n
 
     # Try live discovery to check which suggested skills are actually installed
     live_skills = discover_skills_live()
+    # Build set of all catalog names (includes sub-skills) for sub-skill detection
+    skills_info = _discover_skill_frontmatter()
+    valid_catalog_names = {s["name"] for s in skills_info} if skills_info else set()
+    parent_map = {s["name"]: s.get("parent") for s in skills_info} if skills_info else {}
     if live_skills:
         installed_names = {s["name"] for s in live_skills}
         for suggestion in suggestions:
             skill_name = suggestion["skill"].lstrip("$")
-            suggestion["available"] = any(skill_name in name for name in installed_names)
+            if any(skill_name in name for name in installed_names):
+                suggestion["available"] = True
+            elif skill_name in valid_catalog_names:
+                # In catalog (sub-skill) but not directly invocable
+                suggestion["available"] = "sub_skill"
+            else:
+                suggestion["available"] = False
+            # Ensure parent is populated for all suggestions
+            if "parent" not in suggestion:
+                suggestion["parent"] = parent_map.get(skill_name)
     else:
         for suggestion in suggestions:
             suggestion["available"] = None  # Unknown
+            if "parent" not in suggestion:
+                suggestion["parent"] = parent_map.get(suggestion["skill"].lstrip("$"))
 
     return suggestions
 

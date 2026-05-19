@@ -1,0 +1,27 @@
+# ICR Lab Configuration
+# Section ownership: [backend*] = backends module + scaffold-backend skill
+#                    [deploy]   = deploy-sis skill
+
+[backend]
+default = "simulation"
+
+[backend.simulation]
+# Always available — deterministic engine, no external deps
+
+[backend.cortex]
+model = "llama3.1-8b"
+connection = "default"
+database = ""
+schema = ""
+
+[backend.lmstudio]
+base_url = "http://localhost:1234/v1"
+model = "local-model"
+api_key_env = "LLM_API_KEY"
+
+[deploy]
+database = ""
+schema = ""
+warehouse = ""
+compute_pool = ""
+connection = ""

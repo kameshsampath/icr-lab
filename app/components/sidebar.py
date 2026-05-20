@@ -172,6 +172,17 @@ def render_sidebar() -> SidebarState:  # noqa: PLR0912, PLR0915
         else:
             task_input = example_choice
 
+        # Custom task text input
+        custom_task = st.text_area(
+            "Or enter your own task",
+            value="" if example_choice != "(custom)" else "",
+            placeholder="Describe your task here...",
+            height=100,
+            help="Type a custom task description. This overrides the dropdown selection.",
+        )
+        if custom_task.strip():
+            task_input = custom_task.strip()
+
         # File upload for custom task text/markdown
         uploaded_file = st.file_uploader(
             "Or upload a task file",

@@ -35,7 +35,18 @@ def get_operations_count(task: str) -> int:
         return TASK_OPERATIONS[task]
     # Heuristic: estimate based on word count and action verbs
     words = task.split()
-    action_words = {"deploy", "configure", "set", "build", "create", "migrate",
-                    "refactor", "implement", "integrate", "setup", "install"}
+    action_words = {
+        "deploy",
+        "configure",
+        "set",
+        "build",
+        "create",
+        "migrate",
+        "refactor",
+        "implement",
+        "integrate",
+        "setup",
+        "install",
+    }
     action_count = sum(1 for w in words if w.lower() in action_words)
     return max(3, len(words) // 2 + action_count * 2)

@@ -105,7 +105,7 @@ st.markdown(
     "*Same intent. Different interaction architecture. Different token economics.*"
 )
 st.markdown(
-    "ICR Lab simulates five interaction modes and compares their token footprint:"
+    "ICR Lab simulates six interaction modes and compares their token footprint:"
 )
 st.markdown(
     "- **Verbose Prompting** — long, detailed prompts with repeated context\\n"

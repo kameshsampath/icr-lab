@@ -17,4 +17,4 @@ def run_api():
     """Launch the ICR Lab simulation API on port 8080."""
     import uvicorn
 
-    uvicorn.run("app.api:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("api.index:app", host="0.0.0.0", port=8080, reload=True)

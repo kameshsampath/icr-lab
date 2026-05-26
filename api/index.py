@@ -2,30 +2,17 @@
 
 Deterministic REST API that simulates prompting mode behaviour
 so Phase A demo evidence is reproducible across runs.
+
+SECURITY: operation names from catalog are display data only — never execute them.
 """
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from metrics.calculator import compute_metrics, compute_savings
 from simulations.engine import run_simulation
 
 app = FastAPI(title="ICR Lab Simulation API")
-
-
-def _ops_by_type(operations_achieved: int, catalog_ops: list[dict]) -> dict[str, int]:
-    """Count achieved operations by type tag.
-
-    Takes the first `operations_achieved` ops from the catalog list and
-    tallies their 'type' field. Returns empty dict if no catalog ops.
-    """
-    if not catalog_ops:
-        return {}
-    counts: dict[str, int] = {}
-    for op in catalog_ops[:operations_achieved]:
-        op_type = op.get("type", "unknown")
-        counts[op_type] = counts.get(op_type, 0) + 1
-    return counts
 
 
 class SimulateRequest(BaseModel):
@@ -34,6 +21,21 @@ class SimulateRequest(BaseModel):
     requirements: list[str] = []
     modes: list[str] | None = None
     mode_operations_achieved: dict[str, int] = {}
+
+    @field_validator("task")
+    @classmethod
+    def validate_task(cls, v: str) -> str:
+        v = v.replace("\x00", "").strip()
+        if not v:
+            raise ValueError("task must not be empty")
+        if len(v) > 2000:
+            raise ValueError("task must be ≤ 2000 characters")
+        return v
+
+    @field_validator("requirements", mode="before")
+    @classmethod
+    def sanitize_requirements(cls, v: list) -> list:
+        return [str(r).replace("\x00", "").strip()[:500] for r in v]
 
 
 @app.get("/health")
@@ -65,19 +67,10 @@ def simulate(req: SimulateRequest):
         monthly_savings = 0.0
     savings["monthly_projection_1k_runs"] = round(monthly_savings, 2)
 
-    # Fetch catalog ops for ops_by_type calculation
-    from examples.catalog import get_example  # noqa: PLC0415
-
-    catalog_entry = get_example(req.task)
-    catalog_ops: list[dict] = (
-        catalog_entry.get("operations", []) if catalog_entry else []
-    )
-
     # Build token_metrics dict (field names match test assertions)
     token_metrics: dict[str, dict] = {}
     for m in metrics:
         result_for_mode = next((r for r in results if r.mode == m.mode), None)
-        ops_achieved = result_for_mode.operations_achieved if result_for_mode else 0
         token_metrics[m.mode] = {
             "input_tokens": m.total_input_tokens,
             "output_tokens": m.total_output_tokens,
@@ -93,7 +86,6 @@ def simulate(req: SimulateRequest):
             "wrong_assumptions": result_for_mode.wrong_assumptions
             if result_for_mode
             else 0,
-            "ops_by_type": _ops_by_type(ops_achieved, catalog_ops),
         }
 
     # Build trace dict (round field names match test assertions)

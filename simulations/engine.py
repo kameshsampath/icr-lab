@@ -167,12 +167,6 @@ def _assumption_led_rounds(task: str) -> list[tuple[float, float, str]]:
     return rounds
 
 
-def _simulate(
-    mode: str, task: str, operations: int, round_specs: list[tuple[float, float, str]]
-) -> SimulationResult:
-    return _build_result(mode, _base_tokens(task), operations, round_specs)
-
-
 _OVER_COMPRESSED_ROUNDS = [
     (0.8, 0.6, "Over-compressed intent — system misinterprets scope"),
     (2.5, 1.5, "Correction: user explains what was missed"),
@@ -180,6 +174,24 @@ _OVER_COMPRESSED_ROUNDS = [
     (4.0, 2.5, "Full restatement with explicit ordering and dependencies"),
     (2.0, 2.0, "Final execution after accumulated corrections"),
 ]
+
+# Natural completion fraction per mode — how many ops each mode achieves without override.
+# Clarification Heavy stalls before execution; Over-Compressed misses ~half.
+_MODE_COMPLETION: dict[str, float] = {
+    "Verbose Prompting": 1.0,
+    "Clarification Heavy": 0.0,
+    "Context-Aware": 1.0,
+    "Intent-Optimized": 1.0,
+    "Over-Compressed": 0.5,
+    "Assumption-Led": 1.0,
+}
+
+
+def _simulate(
+    mode: str, task: str, operations: int, round_specs: list[tuple[float, float, str]]
+) -> SimulationResult:
+    ops_achieved = int(operations * _MODE_COMPLETION.get(mode, 1.0))
+    return _build_result(mode, _base_tokens(task), ops_achieved, round_specs)
 
 
 # Mode registry

@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 
 # Add project root to path for imports
@@ -107,6 +108,18 @@ with st.sidebar:
     )
 
     st.divider()
+
+    # Optional requirements list for coverage display
+    st.markdown("**Requirements** *(optional)*")
+    requirements_text = st.text_area(
+        "One requirement per line",
+        placeholder="input form\nweighted formula\ncolor badge\nformula breakdown",
+        height=90,
+        help="When provided, a requirements coverage grid is shown below the simulation results.",
+    )
+    requirements_list = [r.strip() for r in requirements_text.splitlines() if r.strip()]
+
+    st.divider()
     run_clicked = st.button(
         "Run Simulation",
         type="primary",
@@ -153,7 +166,7 @@ if not task_input:
     st.stop()
 
 # Invalidate stale session state on code changes
-_METRICS_VERSION = 9
+_METRICS_VERSION = 10
 if st.session_state.get("_metrics_version") != _METRICS_VERSION:
     for key in ["results", "metrics", "savings", "task", "operations"]:
         st.session_state.pop(key, None)
@@ -175,11 +188,15 @@ if run_clicked:
     st.session_state["task"] = task_input
     st.session_state["operations"] = operations
     st.session_state["assumption_accuracy"] = assumption_accuracy
+    st.session_state["requirements_list"] = requirements_list
 
 # Retrieve from session state
 results = st.session_state["results"]
 task = st.session_state["task"]
 operations = st.session_state["operations"]
+# Requirements: prefer the live sidebar value so updates without re-run still work
+_stored_reqs = st.session_state.get("requirements_list", [])
+active_requirements = requirements_list if requirements_list else _stored_reqs
 
 # Apply compression reactively (slider updates without re-running simulation)
 if compression_factor < 1.0:
@@ -274,7 +291,7 @@ with col_left:
 
 with col_right:
     st.subheader("Efficiency Metrics")
-    df = efficiency_dataframe(metrics)
+    df = efficiency_dataframe(metrics, results)
     st.dataframe(
         df,
         width="stretch",
@@ -328,6 +345,22 @@ elif optimized_result:
     st.success(optimized_result.optimized_prompt)
 
 st.caption("Higher ICR does not mean less intent. It means less redundant expression.")
+
+# --- Requirements Coverage ---
+if active_requirements:
+    st.divider()
+    st.subheader("Requirements Coverage")
+    st.caption(
+        "Green = covered by ops achieved · Red = missed. "
+        "Lower assumption accuracy reduces ops achieved for Assumption Led."
+    )
+    coverage_rows = []
+    for i, req_name in enumerate(active_requirements):
+        row = {"Requirement": req_name}
+        for r in results:
+            row[r.mode] = "✅" if i < r.operations_achieved else "❌"
+        coverage_rows.append(row)
+    st.dataframe(pd.DataFrame(coverage_rows), hide_index=True, width="stretch")
 
 # --- Interaction Traces ---
 st.divider()

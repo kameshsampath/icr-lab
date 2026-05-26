@@ -123,19 +123,34 @@ def cumulative_growth_chart(results: list[SimulationResult]) -> go.Figure:
     return fig
 
 
-def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
+def efficiency_dataframe(
+    metrics: list[ModeMetrics], results: list[SimulationResult] | None = None
+) -> pd.DataFrame:
     """Create a styled comparison table of efficiency metrics."""
-    data = {
+    # Build ops_achieved lookup from results if provided
+    ops_map: dict[str, str] = {}
+    if results:
+        for r in results:
+            # Find total ops from any metric (same for all modes since ops is per-task)
+            ops_map[r.mode] = f"{r.operations_achieved}"
+
+    data: dict[str, list] = {
         "Mode": [m.mode for m in metrics],
         "Rounds": [m.interaction_rounds for m in metrics],
-        "Input Tokens": [f"{m.total_input_tokens:,}" for m in metrics],
-        "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
-        "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
-        "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
-        "Raw ICR": [m.raw_icr_score for m in metrics],
-        "Relative ICR": [round(m.icr_score * 100, 1) for m in metrics],
-        "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
     }
+    if ops_map:
+        data["Ops Achieved"] = [ops_map.get(m.mode, "—") for m in metrics]
+    data.update(
+        {
+            "Input Tokens": [f"{m.total_input_tokens:,}" for m in metrics],
+            "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
+            "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
+            "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
+            "Raw ICR": [m.raw_icr_score for m in metrics],
+            "Relative ICR": [round(m.icr_score * 100, 1) for m in metrics],
+            "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
+        }
+    )
 
     return pd.DataFrame(data)
 

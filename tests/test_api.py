@@ -24,10 +24,10 @@ CANONICAL_REQUEST = {
         "color badge",
         "formula breakdown",
     ],
-    "modes": ["Clarification Heavy", "Intent-Optimized"],
+    "modes": ["Clarification Heavy", "Intent Optimized"],
     "mode_operations_achieved": {
         "Clarification Heavy": 0,
-        "Intent-Optimized": 4,
+        "Intent Optimized": 4,
     },
 }
 
@@ -85,14 +85,14 @@ class TestSimulateEndpoint:
         metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
             "token_metrics"
         ]
-        for mode in ["Clarification Heavy", "Intent-Optimized"]:
+        for mode in ["Clarification Heavy", "Intent Optimized"]:
             assert mode in metrics
 
     def test_token_metrics_has_input_output_total_fields(self, client):
         metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
             "token_metrics"
         ]
-        for mode in ["Clarification Heavy", "Intent-Optimized"]:
+        for mode in ["Clarification Heavy", "Intent Optimized"]:
             m = metrics[mode]
             assert "input_tokens" in m
             assert "output_tokens" in m
@@ -102,7 +102,7 @@ class TestSimulateEndpoint:
         metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
             "token_metrics"
         ]
-        for mode in ["Clarification Heavy", "Intent-Optimized"]:
+        for mode in ["Clarification Heavy", "Intent Optimized"]:
             m = metrics[mode]
             assert "icr" in m
             assert "token_amplification" in m
@@ -110,14 +110,14 @@ class TestSimulateEndpoint:
 
     def test_trace_has_rounds_list_per_mode(self, client):
         trace = client.post("/simulate", json=CANONICAL_REQUEST).json()["trace"]
-        for mode in ["Clarification Heavy", "Intent-Optimized"]:
+        for mode in ["Clarification Heavy", "Intent Optimized"]:
             assert mode in trace
             assert isinstance(trace[mode], list)
             assert len(trace[mode]) >= 1
 
     def test_trace_rounds_have_required_fields(self, client):
         trace = client.post("/simulate", json=CANONICAL_REQUEST).json()["trace"]
-        for mode in ["Clarification Heavy", "Intent-Optimized"]:
+        for mode in ["Clarification Heavy", "Intent Optimized"]:
             for rnd in trace[mode]:
                 assert "round" in rnd
                 assert "input_tokens" in rnd
@@ -157,10 +157,10 @@ class TestRequirementsCoverage:
         coverage = client.post("/simulate", json=CANONICAL_REQUEST).json()[
             "requirements_coverage"
         ]
-        assert "Intent-Optimized" in coverage
-        io = coverage["Intent-Optimized"]
+        assert "Intent Optimized" in coverage
+        io = coverage["Intent Optimized"]
         assert all(v is True for v in io.values()), (
-            f"Expected all True for Intent-Optimized (4/4 ops achieved), got {io}"
+            f"Expected all True for Intent Optimized (4/4 ops achieved), got {io}"
         )
 
     def test_requirements_coverage_keys_match_request_requirements(self, client):
@@ -176,7 +176,7 @@ class TestRequirementsCoverage:
             **CANONICAL_REQUEST,
             "mode_operations_achieved": {
                 "Clarification Heavy": 2,
-                "Intent-Optimized": 4,
+                "Intent Optimized": 4,
             },
         }
         coverage = client.post("/simulate", json=req).json()["requirements_coverage"]
@@ -347,7 +347,7 @@ class TestPatientRiskCatalogEntry:
         prompt = example["prompts"].get("intent_optimized", "")
         assert prompt, "Catalog entry must have an intent_optimized prompt key"
         assert len(prompt) > 100, (
-            f"Intent-Optimized prompt must be the extracted intent block (>100 chars), "
+            f"Intent Optimized prompt must be the extracted intent block (>100 chars), "
             f"got {len(prompt)} chars: {prompt!r}"
         )
 
@@ -391,12 +391,12 @@ class TestNewFields:
             assert metrics[mode]["wrong_assumptions"] >= 0
 
     def test_assumption_led_mode_works(self, client):
-        req = {**CANONICAL_REQUEST, "modes": ["Assumption-Led"]}
+        req = {**CANONICAL_REQUEST, "modes": ["Assumption Led"]}
         response = client.post("/simulate", json=req)
         assert response.status_code == 200
         data = response.json()
-        assert "Assumption-Led" in data["token_metrics"]
-        assert "Assumption-Led" in data["trace"]
+        assert "Assumption Led" in data["token_metrics"]
+        assert "Assumption Led" in data["trace"]
 
     def test_catalog_task_has_measured_token_source(self, client):
         """For a known catalog task, at least one round should have measured tokens."""

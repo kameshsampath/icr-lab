@@ -176,14 +176,14 @@ _OVER_COMPRESSED_ROUNDS = [
 ]
 
 # Natural completion fraction per mode — how many ops each mode achieves without override.
-# Clarification Heavy stalls before execution; Over-Compressed misses ~half.
+# Clarification Heavy stalls before execution; Over Compressed misses ~half.
 _MODE_COMPLETION: dict[str, float] = {
     "Verbose Prompting": 1.0,
     "Clarification Heavy": 0.0,
-    "Context-Aware": 1.0,
-    "Intent-Optimized": 1.0,
-    "Over-Compressed": 0.5,
-    "Assumption-Led": 1.0,
+    "Context Aware": 1.0,
+    "Intent Optimized": 1.0,
+    "Over Compressed": 0.5,
+    "Assumption Led": 1.0,
 }
 
 
@@ -202,17 +202,17 @@ SIMULATION_MODES = {
     "Clarification Heavy": lambda t, ops: _simulate(
         "Clarification Heavy", t, ops, _clarification_rounds(t)
     ),
-    "Context-Aware": lambda t, ops: _simulate(
-        "Context-Aware", t, ops, _CONTEXT_AWARE_ROUNDS
+    "Context Aware": lambda t, ops: _simulate(
+        "Context Aware", t, ops, _CONTEXT_AWARE_ROUNDS
     ),
-    "Intent-Optimized": lambda t, ops: _simulate(
-        "Intent-Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
+    "Intent Optimized": lambda t, ops: _simulate(
+        "Intent Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
     ),
-    "Over-Compressed": lambda t, ops: _simulate(
-        "Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
+    "Over Compressed": lambda t, ops: _simulate(
+        "Over Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
     ),
-    "Assumption-Led": lambda t, ops: _simulate(
-        "Assumption-Led", t, ops, _assumption_led_rounds(t)
+    "Assumption Led": lambda t, ops: _simulate(
+        "Assumption Led", t, ops, _assumption_led_rounds(t)
     ),
 }
 
@@ -333,8 +333,8 @@ def run_simulation(
                 if result.rounds:
                     result.rounds[0].prompt_text = prompt_data
 
-            # Populate assumptions for Assumption-Led mode
-            if result.mode == "Assumption-Led":
+            # Populate assumptions for Assumption Led mode
+            if result.mode == "Assumption Led":
                 wrong = _task_complexity(task) % 3
                 result.total_assumptions = 1 + wrong
                 result.wrong_assumptions = wrong

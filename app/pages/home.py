@@ -14,8 +14,8 @@ from examples.sample_tasks import SAMPLE_TASKS, get_operations_count  # noqa: E4
 from metrics.calculator import compute_metrics, compute_savings  # noqa: E402
 from simulations.engine import (  # noqa: E402
     SIMULATION_MODES,
-    run_simulation,
     apply_output_compression,
+    run_simulation,
 )
 from visuals.charts import (  # noqa: E402
     cumulative_growth_chart,
@@ -56,10 +56,13 @@ with st.sidebar:
     st.divider()
 
     # Mode selection — pills are more compact than multiselect in a narrow sidebar
+    __simulation_opts = sorted(SIMULATION_MODES.keys())
+
     selected_modes = st.pills(
         "Simulation Modes",
-        options=list(SIMULATION_MODES.keys()),
-        default=list(SIMULATION_MODES.keys()),
+        options=__simulation_opts,
+        default=__simulation_opts,
+        format_func=lambda x: x.replace("-", " "),
         selection_mode="multi",
         help="Select which interaction modes to compare",
     )
@@ -111,10 +114,10 @@ st.markdown(
 st.markdown(
     "- **Verbose Prompting** — long, detailed prompts with repeated context\\n"
     "- **Clarification Heavy** — multiple back-and-forth rounds\\n"
-    "- **Context-Aware** — structured requests with partial reuse\\n"
-    "- **Intent-Optimized** — single compressed intent expression\\n"
-    "- **Over-Compressed** — too terse, triggers correction loops that amplify tokens\\n"
-    "- **Assumption-Led** — agent infers missing context, states assumptions, and executes"
+    "- **Context Aware** — structured requests with partial reuse\\n"
+    "- **Intent Optimized** — single compressed intent expression\\n"
+    "- **Over Compressed** — too terse, triggers correction loops that amplify tokens\\n"
+    "- **Assumption Led** — agent infers missing context, states assumptions, and executes"
     " — correction loops emerge when assumptions are wrong"
 )
 
@@ -273,7 +276,7 @@ st.caption("Side-by-side: how the same intent looks at different compression lev
 
 # Find verbose and optimized results
 verbose_result = next((r for r in results if r.mode == "Verbose Prompting"), None)
-optimized_result = next((r for r in results if r.mode == "Intent-Optimized"), None)
+optimized_result = next((r for r in results if r.mode == "Intent Optimized"), None)
 
 if verbose_result and optimized_result:
     col_v, col_o = st.columns(2)
@@ -288,7 +291,7 @@ if verbose_result and optimized_result:
             st.caption(f"~{len(verbose_prompt.split())} words")
 
     with col_o:
-        st.markdown("**Intent-Optimized**")
+        st.markdown("**Intent Optimized**")
         opt_prompt = optimized_result.optimized_prompt
         if opt_prompt:
             st.success(opt_prompt)

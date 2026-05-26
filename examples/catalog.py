@@ -24,10 +24,10 @@ def _sanitize_op(op: dict) -> dict:
 _MODE_KEY_MAP = {
     "Verbose Prompting": "verbose",
     "Clarification Heavy": "clarification_heavy",
-    "Context-Aware": "context_aware",
-    "Intent-Optimized": "intent_optimized",
-    "Over-Compressed": "over_compressed",
-    "Assumption-Led": "assumption_led",
+    "Context Aware": "context_aware",
+    "Intent Optimized": "intent_optimized",
+    "Over Compressed": "over_compressed",
+    "Assumption Led": "assumption_led",
 }
 
 

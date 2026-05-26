@@ -15,9 +15,10 @@ from simulations.engine import SimulationResult
 MODE_COLORS = {
     "Verbose Prompting": "rgb(239, 68, 68)",  # red
     "Clarification Heavy": "rgb(249, 115, 22)",  # orange
-    "Context-Aware": "rgb(59, 130, 246)",  # blue
-    "Intent-Optimized": "rgb(16, 185, 129)",  # green
-    "Over-Compressed": "rgb(168, 85, 247)",  # purple
+    "Context Aware": "rgb(59, 130, 246)",  # blue
+    "Intent Optimized": "rgb(16, 185, 129)",  # green
+    "Over Compressed": "rgb(168, 85, 247)",  # purple
+    "Assumption Led": "rgb(245, 158, 11)",  # amber
 }
 
 

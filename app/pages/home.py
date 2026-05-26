@@ -96,7 +96,7 @@ with st.sidebar:
         "Model accuracy on assumptions",
         min_value=0.0,
         max_value=1.0,
-        value=1.0,
+        value=0.85,
         step=0.05,
         help=(
             "Only affects Assumption Led mode. "
@@ -115,10 +115,12 @@ with st.sidebar:
     )
 
 # --- Main Content ---
-col_title, col_nav = st.columns([4, 1])
+col_title, col_nav1, col_nav2 = st.columns([4, 1, 1])
 with col_title:
     st.header("ICR and Token Economics")
-with col_nav:
+with col_nav1:
+    st.page_link("pages/payload_generator.py", label="Payload Generator", icon="🛠️")
+with col_nav2:
     st.page_link("pages/help.py", label="Help & Glossary", icon="📖")
 
 st.markdown(

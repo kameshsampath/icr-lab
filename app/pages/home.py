@@ -223,9 +223,13 @@ _accuracy_changed = (
 
 if run_clicked or _accuracy_changed:
     operations = get_operations_count(task_input)
-    results = run_simulation(
-        task_input, operations, selected_modes, assumption_accuracy=assumption_accuracy
-    )
+    with st.spinner("Running simulation…"):
+        results = run_simulation(
+            task_input,
+            operations,
+            selected_modes,
+            assumption_accuracy=assumption_accuracy,
+        )
 
     # Store uncompressed results in session state
     st.session_state["results"] = results
@@ -233,6 +237,9 @@ if run_clicked or _accuracy_changed:
     st.session_state["operations"] = operations
     st.session_state["assumption_accuracy"] = assumption_accuracy
     st.session_state["requirements_list"] = requirements_list
+    st.session_state["run_count"] = st.session_state.get("run_count", 0) + 1
+
+    st.toast("Simulation complete", icon="✅")
 
 # Retrieve from session state
 results = st.session_state["results"]
@@ -253,6 +260,12 @@ savings = compute_savings(metrics)
 st.markdown(f"**Task:** {task}")
 st.markdown(
     f"**Intent Fulfilled (ICR baseline):** {operations} ops compressed into 1 intent"
+)
+_run_count = st.session_state.get("run_count", 1)
+_last_acc = st.session_state.get("assumption_accuracy", assumption_accuracy)
+st.caption(
+    f"Run #{_run_count} · Assumption accuracy: {_last_acc:.0%} · "
+    f"{int(_last_acc * 100)}% of assumptions correct"
 )
 
 st.divider()

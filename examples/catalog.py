@@ -466,6 +466,39 @@ EXAMPLES = [
             "Over-Compressed": "Harden the Linux servers.",
         },
     },
+    {
+        "task": "Build me a patient risk calculator.",
+        "operations": [
+            "Input form: age, prior admissions, department, diagnosis code",
+            "Weighted risk score: (prior_admissions×0.4) + (age_factor×0.3) + (diagnosis_factor×0.3)",
+            "Color-coded badge: HIGH / MEDIUM / LOW with thresholds",
+            "Per-factor formula breakdown below the badge",
+        ],
+        "prompts": {
+            "Clarification Heavy": [
+                "Build me a patient risk calculator.",
+                "Something for tracking how sick patients are.",
+                "I guess like a score, based on their age and history.",
+                "Probably a web app, maybe Streamlit?",
+                "It should show if risk is high, medium, or low.",
+                "The formula? I'm not sure — you can decide.",
+                "Just make it look nice and give me the code.",
+            ],
+            "Intent-Optimized": (
+                "## Patient Risk Score Calculator\n"
+                "Streamlit app computing a readmission risk score from patient inputs.\n\n"
+                "### Requirements\n\n"
+                "1. Input form: age, prior admissions count, department (select), primary diagnosis code\n"
+                "2. Compute risk score: (prior_admissions × 0.4) + (age_factor × 0.3) + (diagnosis_factor × 0.3)\n"
+                "3. Color-coded badge: HIGH (score ≥ 0.7), MEDIUM (0.4–0.69), LOW (< 0.4)\n"
+                "4. Formula breakdown below the badge — each factor labeled with its weight\n\n"
+                "### Constraints\n\n"
+                "- Language: Python\n"
+                "- Framework: Streamlit\n"
+                "- Output: generated/code/"
+            ),
+        },
+    },
 ]
 
 

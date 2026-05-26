@@ -431,3 +431,52 @@ class TestInputValidation:
         resp = client.post("/simulate", json=req)
         # API accepts it (display layer responsibility to escape HTML)
         assert resp.status_code in (200, 422)
+
+
+# ---------------------------------------------------------------------------
+# Assumption accuracy
+# ---------------------------------------------------------------------------
+
+
+class TestAssumptionAccuracy:
+    def test_default_accuracy_is_perfect(self, client):
+        """Default accuracy=1.0 → 0 wrong assumptions → 1 round for Assumption Led."""
+        req = {**CANONICAL_REQUEST, "modes": ["Assumption Led"]}
+        data = client.post("/simulate", json=req).json()
+        m = data["token_metrics"]["Assumption Led"]
+        assert m["wrong_assumptions"] == 0
+        assert m["interaction_rounds"] == 1
+
+    def test_low_accuracy_adds_rounds(self, client):
+        """accuracy=0.0 → all assumptions wrong → multiple rounds."""
+        req = {
+            **CANONICAL_REQUEST,
+            "modes": ["Assumption Led"],
+            "assumption_accuracy": 0.0,
+        }
+        trace = client.post("/simulate", json=req).json()["trace"]
+        assert len(trace["Assumption Led"]) > 1
+
+    def test_low_accuracy_reduces_ops_on_complex_task(self, client):
+        """accuracy=0.0 on a complex task → some requirements not covered."""
+        req = {
+            "task": "Deploy a connector with Snowflake Openflow",
+            "modes": ["Assumption Led"],
+            "assumption_accuracy": 0.0,
+            "requirements": ["r1", "r2", "r3", "r4", "r5", "r6"],
+        }
+        data = client.post("/simulate", json=req).json()
+        cov = data["requirements_coverage"]["Assumption Led"]
+        assert any(v is False for v in cov.values()), (
+            "Low accuracy should cause at least one requirement to be uncovered"
+        )
+
+    def test_accuracy_above_1_rejected(self, client):
+        """assumption_accuracy > 1.0 must be rejected with 422."""
+        req = {**CANONICAL_REQUEST, "assumption_accuracy": 1.5}
+        assert client.post("/simulate", json=req).status_code == 422
+
+    def test_accuracy_below_0_rejected(self, client):
+        """assumption_accuracy < 0.0 must be rejected with 422."""
+        req = {**CANONICAL_REQUEST, "assumption_accuracy": -0.1}
+        assert client.post("/simulate", json=req).status_code == 422

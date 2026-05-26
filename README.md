@@ -11,7 +11,9 @@ The main demo is titled **ICR and Token Economics** — an interactive Streamlit
 - **Relative ICR Scores** — Normalized 0-100% comparison across interaction modes. The most efficient mode scores 100%; others are scored relative to it.
 - **Token Amplification Factor** — How many extra tokens a less-efficient mode consumes for the same intent (e.g., "Verbose Prompting uses 7.0x more tokens").
 - **Output Compression Toggle** — Simulate Caveman-style output brevity to show that compression compounds with good architecture but doesn't replace it.
+- **Assumption Accuracy Slider** — Control how accurate the model's inferences are in Assumption Led mode. Slide from 1.0 (perfect) to 0.0 (all wrong) to see how assumption quality drives correction loops and missed requirements.
 - **Prompt Comparison** — Side-by-side view of verbose vs. intent-optimized prompts achieving identical outcomes.
+- **Payload Generator** — Interactive page to build and copy the `/simulate` API request JSON and a ready-to-run cURL command.
 - **Help / Glossary** — Built-in reference page explaining ICR, token amplification, relative scores, token economics, and why v1 uses simulation instead of live LLM calls.
 
 ## Why Simulation?
@@ -57,8 +59,10 @@ streamlit run app/main.py
 
 1. Select or enter a task in the sidebar
 2. Choose simulation modes to compare
-3. Click **Run Simulation**
-4. Explore: ICR gauges, token comparison, cumulative growth, prompt comparison, interaction traces
+3. Adjust **Assumption Accuracy** (affects Assumption Led mode — 1.0 = perfect, 0.0 = all wrong)
+4. Click **Run Simulation**
+5. Explore: ICR gauges, token comparison, cumulative growth, prompt comparison, interaction traces
+6. Use the **Payload Generator** page to build an API request JSON and cURL command
 
 ## Simulation Modes
 
@@ -66,27 +70,67 @@ streamlit run app/main.py
 |------|----------|-----------------|
 | Verbose Prompting | Large prompts with repeated context | Lowest |
 | Clarification Heavy | Multiple rounds with growing context | Low |
-| Over-Compressed | Ambiguous compressed prompt triggers correction loops | Variable (often worse than Context-Aware) |
-| Context-Aware | Structured requests with partial reuse | Moderate |
-| Intent-Optimized | Single compressed intent expression | Highest |
+| Over Compressed | Ambiguous compressed prompt triggers correction loops | Variable |
+| Context Aware | Structured requests with partial reuse | Moderate |
+| Assumption Led | Agent infers missing context and executes; correction loops emerge when assumptions are wrong — controlled by `assumption_accuracy` | Moderate–Low |
+| Intent Optimized | Single compressed intent expression | Highest |
 
 ## Project Structure
 
 ```
 icr-lab/
 ├── app/
-│   ├── main.py              # Streamlit dashboard (main page)
-│   └── pages/help.py        # Help / Glossary page
-├── simulations/engine.py    # Simulation logic for 5 modes
-├── metrics/calculator.py    # ICR formula + cost calculations
-├── visuals/charts.py        # Plotly chart builders
+│   ├── main.py                     # Streamlit entry point (registers pages)
+│   └── pages/
+│       ├── home.py                 # Main simulator dashboard
+│       ├── payload_generator.py    # API payload builder
+│       └── help.py                 # Help / Glossary page
+├── api/index.py                    # FastAPI /simulate endpoint
+├── simulations/engine.py           # Simulation logic for 6 modes
+├── metrics/calculator.py           # ICR formula + cost calculations
+├── visuals/charts.py               # Plotly chart builders
 ├── examples/
-│   ├── catalog.py           # Full prompt examples per mode
-│   └── sample_tasks.py      # Pre-built example tasks
-├── .streamlit/config.toml   # Streamlit configuration
-├── pyproject.toml           # uv project configuration
+│   ├── catalog.py                  # Full prompt examples per mode
+│   └── sample_tasks.py             # Pre-built example tasks
+├── .streamlit/config.toml          # Streamlit configuration
+├── pyproject.toml                  # uv project configuration
 └── README.md
 ```
+
+## API
+
+The simulation engine is also exposed as a REST API (`api/index.py`).
+
+### Run the API
+
+```bash
+task api
+# or:
+uv run uvicorn api.index:app --reload
+```
+
+### `POST /simulate`
+
+```json
+{
+  "task": "Deploy a connector with Snowflake Openflow",
+  "operations": 12,
+  "modes": ["Clarification Heavy", "Assumption Led", "Intent Optimized"],
+  "requirements": ["connector installed", "schema mapped", "data flowing", "alerts configured"],
+  "assumption_accuracy": 0.85
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `task` | string | required | Task description (≤ 2000 chars) |
+| `operations` | int | auto | Number of operations; auto-derived from catalog when omitted |
+| `modes` | string[] | all | Modes to simulate |
+| `requirements` | string[] | `[]` | Requirements to map against `operations_achieved` |
+| `assumption_accuracy` | float 0–1 | `1.0` | Fraction of assumptions correct in Assumption Led mode |
+| `mode_operations_achieved` | dict | `{}` | Override per-mode `operations_achieved` for demo scenarios |
+
+Use the **Payload Generator** page in the app to build requests visually.
 
 ## Related Reading
 

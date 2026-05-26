@@ -22,6 +22,7 @@ class SimulateRequest(BaseModel):
     requirements: list[str] = []
     modes: list[str] | None = None
     mode_operations_achieved: dict[str, int] = {}
+    assumption_accuracy: float = 1.0  # 0.0 = all wrong, 1.0 = all correct
 
     @field_validator("task")
     @classmethod
@@ -38,6 +39,13 @@ class SimulateRequest(BaseModel):
     def sanitize_requirements(cls, v: list) -> list:
         return [str(r).replace("\x00", "").strip()[:500] for r in v]
 
+    @field_validator("assumption_accuracy")
+    @classmethod
+    def validate_accuracy(cls, v: float) -> float:
+        if not 0.0 <= v <= 1.0:
+            raise ValueError("assumption_accuracy must be between 0.0 and 1.0")
+        return round(v, 4)
+
 
 @app.get("/health")
 def health():
@@ -52,7 +60,9 @@ def simulate(req: SimulateRequest):
     )
 
     # Run simulation for the requested modes
-    results = run_simulation(req.task, operations, req.modes)
+    results = run_simulation(
+        req.task, operations, req.modes, assumption_accuracy=req.assumption_accuracy
+    )
 
     # Override per-mode operations_achieved BEFORE compute_metrics
     if req.mode_operations_achieved:

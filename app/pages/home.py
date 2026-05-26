@@ -90,7 +90,23 @@ with st.sidebar:
 
     st.divider()
 
-    # Run button
+    # Assumption accuracy slider
+    st.markdown("**Assumption Accuracy**")
+    assumption_accuracy = st.slider(
+        "Model accuracy on assumptions",
+        min_value=0.0,
+        max_value=1.0,
+        value=1.0,
+        step=0.05,
+        help=(
+            "Only affects Assumption Led mode. "
+            "1.0 = perfect assumptions (0 wrong), "
+            "0.0 = all assumptions wrong. "
+            "Try 0.85 for a strong model or 0.60 for a mid-tier model."
+        ),
+    )
+
+    st.divider()
     run_clicked = st.button(
         "Run Simulation",
         type="primary",
@@ -135,7 +151,7 @@ if not task_input:
     st.stop()
 
 # Invalidate stale session state on code changes
-_METRICS_VERSION = 8
+_METRICS_VERSION = 9
 if st.session_state.get("_metrics_version") != _METRICS_VERSION:
     for key in ["results", "metrics", "savings", "task", "operations"]:
         st.session_state.pop(key, None)
@@ -148,12 +164,15 @@ if not run_clicked and "results" not in st.session_state:
 # Run simulation
 if run_clicked:
     operations = get_operations_count(task_input)
-    results = run_simulation(task_input, operations, selected_modes)
+    results = run_simulation(
+        task_input, operations, selected_modes, assumption_accuracy=assumption_accuracy
+    )
 
     # Store uncompressed results in session state
     st.session_state["results"] = results
     st.session_state["task"] = task_input
     st.session_state["operations"] = operations
+    st.session_state["assumption_accuracy"] = assumption_accuracy
 
 # Retrieve from session state
 results = st.session_state["results"]

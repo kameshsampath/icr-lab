@@ -5,6 +5,7 @@ showing how interaction architecture affects token consumption.
 """
 
 import hashlib
+import math
 from dataclasses import dataclass, field
 
 
@@ -131,14 +132,13 @@ _ASSUMPTION_DESCRIPTIONS = [
 ]
 
 
-def _assumption_led_rounds(task: str) -> list[tuple[float, float, str]]:
-    """Generate round specs for assumption-led mode.
+def _assumption_led_rounds(wrong: int) -> list[tuple[float, float, str]]:
+    """Generate round specs for assumption-led mode given the number of wrong assumptions.
 
     Round 1: agent states assumptions and executes (low input — user said little,
     higher output — agent infers and acts). Subsequent rounds are corrections
-    for wrong assumptions. Number of wrong assumptions derived from task complexity.
+    for wrong assumptions.
     """
-    wrong = _task_complexity(task) % 3  # 0, 1, or 2 wrong assumptions
     rounds = [
         (
             0.6,
@@ -165,6 +165,35 @@ def _assumption_led_rounds(task: str) -> list[tuple[float, float, str]]:
             )
         )
     return rounds
+
+
+def _simulate_assumption_led(
+    task: str, operations: int, accuracy: float = 1.0
+) -> "SimulationResult":
+    """Simulate Assumption Led mode with caller-controlled accuracy.
+
+    Args:
+        task: The task description.
+        operations: Number of operations the task requires.
+        accuracy: Fraction of assumptions that are correct (0.0–1.0).
+                  1.0 = perfect (0 wrong), 0.0 = all wrong.
+    """
+    c = _task_complexity(task)
+    total_a = 1 + (c % 3)
+    wrong = min(math.ceil(total_a * (1 - accuracy)), total_a)
+    # Correction rounds recover all but the last wrong assumption (still misses work)
+    unrecovered = max(0, wrong - (1 if wrong > 0 else 0))
+    ops_missed = math.ceil(unrecovered * operations / total_a) if total_a > 0 else 0
+    ops_achieved = max(0, operations - ops_missed)
+    result = _build_result(
+        "Assumption Led",
+        _base_tokens(task),
+        ops_achieved,
+        _assumption_led_rounds(wrong),
+    )
+    result.total_assumptions = total_a
+    result.wrong_assumptions = wrong
+    return result
 
 
 _OVER_COMPRESSED_ROUNDS = [
@@ -211,9 +240,7 @@ SIMULATION_MODES = {
     "Over Compressed": lambda t, ops: _simulate(
         "Over Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
     ),
-    "Assumption Led": lambda t, ops: _simulate(
-        "Assumption Led", t, ops, _assumption_led_rounds(t)
-    ),
+    "Assumption Led": lambda t, ops: _simulate_assumption_led(t, ops),
 }
 
 
@@ -294,7 +321,10 @@ def recount_from_prompts(results: list[SimulationResult]) -> None:
 
 
 def run_simulation(
-    task: str, operations: int, modes: list[str] | None = None
+    task: str,
+    operations: int,
+    modes: list[str] | None = None,
+    assumption_accuracy: float = 1.0,
 ) -> list[SimulationResult]:
     """Run simulations for selected modes.
 
@@ -302,6 +332,7 @@ def run_simulation(
         task: The task description to simulate.
         operations: Number of operations the task requires.
         modes: List of mode names to simulate. Defaults to all modes.
+        assumption_accuracy: Accuracy of assumptions for Assumption Led mode (0.0–1.0).
 
     Returns:
         List of SimulationResult objects.
@@ -316,7 +347,10 @@ def run_simulation(
     results = []
     for mode in modes:
         if mode in SIMULATION_MODES:
-            result = SIMULATION_MODES[mode](task, operations)
+            if mode == "Assumption Led":
+                result = _simulate_assumption_led(task, operations, assumption_accuracy)
+            else:
+                result = SIMULATION_MODES[mode](task, operations)
             result.optimized_prompt = optimized
 
             # Populate prompt texts from catalog
@@ -333,11 +367,8 @@ def run_simulation(
                 if result.rounds:
                     result.rounds[0].prompt_text = prompt_data
 
-            # Populate assumptions for Assumption Led mode
+            # Populate assumptions list for Assumption Led mode
             if result.mode == "Assumption Led":
-                wrong = _task_complexity(task) % 3
-                result.total_assumptions = 1 + wrong
-                result.wrong_assumptions = wrong
                 if result.rounds and isinstance(prompt_data, list) and prompt_data:
                     result.rounds[0].assumptions = [prompt_data[0]]
 

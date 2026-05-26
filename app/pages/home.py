@@ -108,11 +108,13 @@ st.markdown(
     "ICR Lab simulates five interaction modes and compares their token footprint:"
 )
 st.markdown(
-    "- **Verbose Prompting** — long, detailed prompts with repeated context\n"
-    "- **Clarification Heavy** — multiple back-and-forth rounds\n"
-    "- **Context-Aware** — structured requests with partial reuse\n"
-    "- **Intent-Optimized** — single compressed intent expression\n"
-    "- **Over-Compressed** — too terse, triggers correction loops that amplify tokens"
+    "- **Verbose Prompting** — long, detailed prompts with repeated context\\n"
+    "- **Clarification Heavy** — multiple back-and-forth rounds\\n"
+    "- **Context-Aware** — structured requests with partial reuse\\n"
+    "- **Intent-Optimized** — single compressed intent expression\\n"
+    "- **Over-Compressed** — too terse, triggers correction loops that amplify tokens\\n"
+    "- **Assumption-Led** — agent infers missing context, states assumptions, and executes"
+    " — correction loops emerge when assumptions are wrong"
 )
 
 # ICR Formula
@@ -311,13 +313,16 @@ for result in results:
         f"{result.mode} — {len(result.rounds)} round(s), {result.total_tokens:,} total tokens"
     ):
         for r in result.rounds:
+            source_badge = "📐" if r.token_source == "measured" else "~"
             st.markdown(
                 f"**Round {r.round_number}:** {r.description}  \n"
-                f"↳ Input: {r.input_tokens:,} | Output: {r.output_tokens:,} | "
+                f"↳ Input: {source_badge}{r.input_tokens:,} | Output: ~{r.output_tokens:,} | "
                 f"Cumulative: {r.cumulative_tokens:,}"
             )
             if r.prompt_text:
                 st.code(r.prompt_text, language=None)
+            if r.assumptions:
+                st.info("**Assumptions made:** " + " · ".join(r.assumptions))
 
         # Show optimized alternative for non-optimal modes
         if result.mode != "Intent-Optimized" and result.optimized_prompt:

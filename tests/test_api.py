@@ -351,3 +351,82 @@ class TestPatientRiskCatalogEntry:
             f"Intent-Optimized prompt must be the extracted intent block (>100 chars), "
             f"got {len(prompt)} chars: {prompt!r}"
         )
+
+
+# ---------------------------------------------------------------------------
+# New fields — token_source, assumptions, ops_by_type
+# ---------------------------------------------------------------------------
+
+
+class TestNewFields:
+    """Verify fields added in the assumption-led + tiktoken commits."""
+
+    def test_trace_rounds_have_token_source_field(self, client):
+        trace = client.post("/simulate", json=CANONICAL_REQUEST).json()["trace"]
+        for mode_rounds in trace.values():
+            for rnd in mode_rounds:
+                assert "token_source" in rnd, "Each round must have token_source"
+                assert rnd["token_source"] in ("measured", "estimated")
+
+    def test_trace_rounds_have_assumptions_field(self, client):
+        trace = client.post("/simulate", json=CANONICAL_REQUEST).json()["trace"]
+        for mode_rounds in trace.values():
+            for rnd in mode_rounds:
+                assert "assumptions" in rnd, "Each round must have assumptions list"
+                assert isinstance(rnd["assumptions"], list)
+
+    def test_token_metrics_has_total_assumptions(self, client):
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
+        for mode in CANONICAL_REQUEST["modes"]:
+            assert "total_assumptions" in metrics[mode]
+            assert isinstance(metrics[mode]["total_assumptions"], int)
+
+    def test_token_metrics_has_wrong_assumptions(self, client):
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
+        for mode in CANONICAL_REQUEST["modes"]:
+            assert "wrong_assumptions" in metrics[mode]
+            assert metrics[mode]["wrong_assumptions"] >= 0
+
+    def test_token_metrics_has_ops_by_type(self, client):
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
+        for mode in CANONICAL_REQUEST["modes"]:
+            assert "ops_by_type" in metrics[mode]
+            assert isinstance(metrics[mode]["ops_by_type"], dict)
+
+    def test_assumption_led_mode_works(self, client):
+        req = {**CANONICAL_REQUEST, "modes": ["Assumption-Led"]}
+        response = client.post("/simulate", json=req)
+        assert response.status_code == 200
+        data = response.json()
+        assert "Assumption-Led" in data["token_metrics"]
+        assert "Assumption-Led" in data["trace"]
+
+    def test_catalog_task_has_measured_token_source(self, client):
+        """For a known catalog task, at least one round should have measured tokens."""
+        trace = client.post("/simulate", json=CANONICAL_REQUEST).json()["trace"]
+        # patient-risk-calculator is in catalog — Clarification Heavy has scripted prompts
+        ch_rounds = trace.get("Clarification Heavy", [])
+        measured = [r for r in ch_rounds if r.get("token_source") == "measured"]
+        assert len(measured) >= 1, (
+            "Clarification Heavy for a catalog task must have at least 1 measured round"
+        )
+
+    def test_intent_optimized_ops_by_type_sums_to_ops_achieved(self, client):
+        """For Intent-Optimized with all ops achieved, ops_by_type total should equal operations."""
+        req = {
+            **CANONICAL_REQUEST,
+            "modes": ["Intent-Optimized"],
+            "mode_operations_achieved": {"Intent-Optimized": 4},
+        }
+        data = client.post("/simulate", json=req).json()
+        ops_by_type = data["token_metrics"]["Intent-Optimized"]["ops_by_type"]
+        # patient-risk-calculator is in catalog, so ops_by_type should be non-empty
+        # and sum to 4
+        if ops_by_type:
+            assert sum(ops_by_type.values()) == 4

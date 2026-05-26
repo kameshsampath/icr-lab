@@ -13,6 +13,21 @@ from simulations.engine import run_simulation
 app = FastAPI(title="ICR Lab Simulation API")
 
 
+def _ops_by_type(operations_achieved: int, catalog_ops: list[dict]) -> dict[str, int]:
+    """Count achieved operations by type tag.
+
+    Takes the first `operations_achieved` ops from the catalog list and
+    tallies their 'type' field. Returns empty dict if no catalog ops.
+    """
+    if not catalog_ops:
+        return {}
+    counts: dict[str, int] = {}
+    for op in catalog_ops[:operations_achieved]:
+        op_type = op.get("type", "unknown")
+        counts[op_type] = counts.get(op_type, 0) + 1
+    return counts
+
+
 class SimulateRequest(BaseModel):
     task: str
     operations: int
@@ -50,9 +65,19 @@ def simulate(req: SimulateRequest):
         monthly_savings = 0.0
     savings["monthly_projection_1k_runs"] = round(monthly_savings, 2)
 
+    # Fetch catalog ops for ops_by_type calculation
+    from examples.catalog import get_example  # noqa: PLC0415
+
+    catalog_entry = get_example(req.task)
+    catalog_ops: list[dict] = (
+        catalog_entry.get("operations", []) if catalog_entry else []
+    )
+
     # Build token_metrics dict (field names match test assertions)
     token_metrics: dict[str, dict] = {}
     for m in metrics:
+        result_for_mode = next((r for r in results if r.mode == m.mode), None)
+        ops_achieved = result_for_mode.operations_achieved if result_for_mode else 0
         token_metrics[m.mode] = {
             "input_tokens": m.total_input_tokens,
             "output_tokens": m.total_output_tokens,
@@ -62,6 +87,13 @@ def simulate(req: SimulateRequest):
             "raw_icr": m.raw_icr_score,
             "token_amplification": m.token_amplification,
             "estimated_cost": m.estimated_cost,
+            "total_assumptions": result_for_mode.total_assumptions
+            if result_for_mode
+            else 0,
+            "wrong_assumptions": result_for_mode.wrong_assumptions
+            if result_for_mode
+            else 0,
+            "ops_by_type": _ops_by_type(ops_achieved, catalog_ops),
         }
 
     # Build trace dict (round field names match test assertions)
@@ -75,6 +107,8 @@ def simulate(req: SimulateRequest):
                 "cumulative_tokens": rnd.cumulative_tokens,
                 "description": rnd.description,
                 "prompt_text": rnd.prompt_text,
+                "token_source": rnd.token_source,
+                "assumptions": rnd.assumptions,
             }
             for rnd in r.rounds
         ]
@@ -84,8 +118,7 @@ def simulate(req: SimulateRequest):
     for r in results:
         ops_achieved = r.operations_achieved
         coverage = {
-            req_name: (i < ops_achieved)
-            for i, req_name in enumerate(req.requirements)
+            req_name: (i < ops_achieved) for i, req_name in enumerate(req.requirements)
         }
         requirements_coverage[r.mode] = coverage
 

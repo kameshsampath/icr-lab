@@ -1,22 +1,9 @@
 [[examples]]
 task = "Deploy a connector with Snowflake Openflow"
-operations = [
-    {name = "Create service user",                        type = "sql"},
-    {name = "Create service role",                        type = "sql"},
-    {name = "Grant role to user",                         type = "sql"},
-    {name = "Create network rule",                        type = "sql"},
-    {name = "Create network policy",                      type = "sql"},
-    {name = "Attach network policy to user",              type = "sql"},
-    {name = "Create authentication policy",               type = "sql"},
-    {name = "Attach authentication policy to user",       type = "sql"},
-    {name = "Configure PAT policy constraints",           type = "config"},
-    {name = "Generate PAT",                               type = "sql"},
-    {name = "Store PAT securely for client usage",        type = "config"},
-    {name = "Validate token exchange via Apache NiPyAPI", type = "python"},
-]
 
 [examples.prompts]
-verbose = """I need to deploy a connector using Snowflake Openflow. \
+verbose = """\
+I need to deploy a connector using Snowflake Openflow. \
 First, I need a service user created in Snowflake. The user should be a service account type. \
 Then I need a role created for this service user. The role should be granted to the user. \
 After that, I need network rules configured to allow access to the external endpoint. \
@@ -47,22 +34,49 @@ assumption_led = [
     "Re-executing with Azure Blob Storage target and updated endpoint configuration.",
 ]
 
+[[examples.operations]]
+name = "Create service user"
+
+[[examples.operations]]
+name = "Create service role"
+
+[[examples.operations]]
+name = "Grant role to user"
+
+[[examples.operations]]
+name = "Create network rule"
+
+[[examples.operations]]
+name = "Create network policy"
+
+[[examples.operations]]
+name = "Attach network policy to user"
+
+[[examples.operations]]
+name = "Create authentication policy"
+
+[[examples.operations]]
+name = "Attach authentication policy to user"
+
+[[examples.operations]]
+name = "Configure PAT policy constraints"
+
+[[examples.operations]]
+name = "Generate PAT"
+
+[[examples.operations]]
+name = "Store PAT securely for client usage"
+
+[[examples.operations]]
+name = "Validate token exchange via Apache NiPyAPI"
+
+
 [[examples]]
 task = "Deploy payment service with autoscaling and observability"
-operations = [
-    {name = "Build container image",              type = "bash"},
-    {name = "Push to registry",                   type = "bash"},
-    {name = "Create Kubernetes deployment",       type = "bash"},
-    {name = "Configure HPA autoscaling",          type = "config"},
-    {name = "Set up service and ingress",          type = "bash"},
-    {name = "Deploy Prometheus metrics exporter", type = "bash"},
-    {name = "Configure Grafana dashboards",       type = "config"},
-    {name = "Set up alerting rules",              type = "config"},
-    {name = "Configure distributed tracing",      type = "config"},
-]
 
 [examples.prompts]
-verbose = """I need to deploy our payment service. It's a containerized application that needs to \
+verbose = """\
+I need to deploy our payment service. It's a containerized application that needs to \
 be deployed to Kubernetes. First, build the Docker image from the Dockerfile in the \
 repo. Then push it to our container registry. Create a Kubernetes deployment with the \
 image. I also need autoscaling — use a Horizontal Pod Autoscaler that scales based on \
@@ -88,19 +102,40 @@ assumption_led = [
     "Re-executing with ECR registry and Datadog for dashboards and alerting.",
 ]
 
+[[examples.operations]]
+name = "Build container image"
+
+[[examples.operations]]
+name = "Push to registry"
+
+[[examples.operations]]
+name = "Create Kubernetes deployment"
+
+[[examples.operations]]
+name = "Configure HPA autoscaling"
+
+[[examples.operations]]
+name = "Set up service and ingress"
+
+[[examples.operations]]
+name = "Deploy Prometheus metrics exporter"
+
+[[examples.operations]]
+name = "Configure Grafana dashboards"
+
+[[examples.operations]]
+name = "Set up alerting rules"
+
+[[examples.operations]]
+name = "Configure distributed tracing"
+
+
 [[examples]]
 task = "Set up an Iceberg table with external volume"
-operations = [
-    {name = "Create storage integration", type = "sql"},
-    {name = "Configure IAM roles",        type = "config"},
-    {name = "Create external volume",     type = "sql"},
-    {name = "Validate access",            type = "sql"},
-    {name = "Create catalog integration", type = "sql"},
-    {name = "Create Iceberg table",       type = "sql"},
-]
 
 [examples.prompts]
-verbose = """I want to set up an Apache Iceberg table in Snowflake that uses an external volume. \
+verbose = """\
+I want to set up an Apache Iceberg table in Snowflake that uses an external volume. \
 First, I need a storage integration created that points to our S3 bucket. \
 The S3 bucket is in us-east-1. I'll need the IAM role configured with the right \
 trust policy so Snowflake can assume it. Then create an external volume using the \
@@ -125,21 +160,31 @@ assumption_led = [
     "Re-executing with GCS external volume and updated storage integration.",
 ]
 
+[[examples.operations]]
+name = "Create storage integration"
+
+[[examples.operations]]
+name = "Configure IAM roles"
+
+[[examples.operations]]
+name = "Create external volume"
+
+[[examples.operations]]
+name = "Validate access"
+
+[[examples.operations]]
+name = "Create catalog integration"
+
+[[examples.operations]]
+name = "Create Iceberg table"
+
+
 [[examples]]
 task = "Refactor authentication module to use OAuth2"
-operations = [
-    {name = "Audit current auth implementation", type = "python"},
-    {name = "Design OAuth2 flow",                type = "config"},
-    {name = "Implement token endpoint",          type = "python"},
-    {name = "Add refresh token logic",           type = "python"},
-    {name = "Update middleware",                 type = "python"},
-    {name = "Migrate session handling",          type = "python"},
-    {name = "Update API clients",                type = "python"},
-    {name = "Add PKCE support",                  type = "python"},
-]
 
 [examples.prompts]
-verbose = """I need to refactor our authentication module. Currently it uses session-based auth \
+verbose = """\
+I need to refactor our authentication module. Currently it uses session-based auth \
 with cookies, but we need to move to OAuth2. I need you to first audit the current \
 implementation to understand all the places auth is used. Then design the OAuth2 flow — \
 we want authorization code flow with PKCE. Implement a token endpoint that issues \
@@ -166,23 +211,37 @@ assumption_led = [
     "Re-executing with PKCE for public clients and client credentials flow for legacy services.",
 ]
 
+[[examples.operations]]
+name = "Audit current auth implementation"
+
+[[examples.operations]]
+name = "Design OAuth2 flow"
+
+[[examples.operations]]
+name = "Implement token endpoint"
+
+[[examples.operations]]
+name = "Add refresh token logic"
+
+[[examples.operations]]
+name = "Update middleware"
+
+[[examples.operations]]
+name = "Migrate session handling"
+
+[[examples.operations]]
+name = "Update API clients"
+
+[[examples.operations]]
+name = "Add PKCE support"
+
+
 [[examples]]
 task = "Build real-time data pipeline with CDC"
-operations = [
-    {name = "Configure source database CDC",          type = "config"},
-    {name = "Set up Kafka Connect source connector",  type = "config"},
-    {name = "Create Kafka topics with schemas",       type = "bash"},
-    {name = "Implement stream processing transforms", type = "python"},
-    {name = "Configure sink connector",               type = "config"},
-    {name = "Set up schema registry",                 type = "bash"},
-    {name = "Implement dead letter queue",            type = "python"},
-    {name = "Configure monitoring",                   type = "config"},
-    {name = "Set up data quality checks",             type = "python"},
-    {name = "Implement backfill strategy",            type = "python"},
-]
 
 [examples.prompts]
-verbose = """I need to build a real-time data pipeline using Change Data Capture. The source is \
+verbose = """\
+I need to build a real-time data pipeline using Change Data Capture. The source is \
 a PostgreSQL database. I need CDC enabled on the source tables — use logical \
 replication. Then set up a Kafka Connect source connector to stream the changes \
 into Kafka. Create the necessary Kafka topics with proper partitioning and retention. \
@@ -211,17 +270,43 @@ assumption_led = [
     "Re-executing with MySQL CDC using Debezium connector instead of PostgreSQL logical replication.",
 ]
 
+[[examples.operations]]
+name = "Configure source database CDC"
+
+[[examples.operations]]
+name = "Set up Kafka Connect source connector"
+
+[[examples.operations]]
+name = "Create Kafka topics with schemas"
+
+[[examples.operations]]
+name = "Implement stream processing transforms"
+
+[[examples.operations]]
+name = "Configure sink connector"
+
+[[examples.operations]]
+name = "Set up schema registry"
+
+[[examples.operations]]
+name = "Implement dead letter queue"
+
+[[examples.operations]]
+name = "Configure monitoring"
+
+[[examples.operations]]
+name = "Set up data quality checks"
+
+[[examples.operations]]
+name = "Implement backfill strategy"
+
+
 [[examples]]
 task = "Configure network access with security policies"
-operations = [
-    {name = "Define network rule",           type = "sql"},
-    {name = "Create network policy",         type = "sql"},
-    {name = "Attach policy to account/user", type = "sql"},
-    {name = "Validate connectivity",         type = "bash"},
-]
 
 [examples.prompts]
-verbose = """I need to configure network access in Snowflake. I want to create a network rule \
+verbose = """\
+I need to configure network access in Snowflake. I want to create a network rule \
 that allows access to googleapis.com. The rule should be of type HOST_PORT. Then I \
 need a network policy that uses this rule in its allowed list. The policy should be \
 attached to the service user we created. After attaching, I need to validate that \
@@ -243,24 +328,25 @@ assumption_led = [
     "Re-executing with user-level network policy attachment for the service account.",
 ]
 
+[[examples.operations]]
+name = "Define network rule"
+
+[[examples.operations]]
+name = "Create network policy"
+
+[[examples.operations]]
+name = "Attach policy to account/user"
+
+[[examples.operations]]
+name = "Validate connectivity"
+
+
 [[examples]]
 task = "Deploy microservices app with service mesh and canary rollouts"
-operations = [
-    {name = "Create namespace with labels",            type = "bash"},
-    {name = "Deploy microservice Deployments",         type = "bash"},
-    {name = "Create ClusterIP Services",               type = "bash"},
-    {name = "Install Istio sidecar injection",         type = "bash"},
-    {name = "Configure VirtualService routing",        type = "config"},
-    {name = "Define DestinationRules with subsets",    type = "config"},
-    {name = "Set canary weight-based traffic split",   type = "config"},
-    {name = "Enable mTLS with PeerAuthentication",     type = "config"},
-    {name = "Add circuit breaker policies",            type = "config"},
-    {name = "Configure rate limiting with EnvoyFilter", type = "config"},
-    {name = "Set up HPA for each service",             type = "config"},
-]
 
 [examples.prompts]
-verbose = """I need to deploy our microservices application to Kubernetes with a service mesh. \
+verbose = """\
+I need to deploy our microservices application to Kubernetes with a service mesh. \
 First, create a namespace with the proper Istio injection labels. Then deploy each \
 microservice as a Deployment with the right resource limits and readiness probes. \
 Create ClusterIP Services for each. Install Istio sidecar injection so all pods get \
@@ -291,21 +377,46 @@ assumption_led = [
     "Re-executing with PERMISSIVE mTLS and updated PeerAuthentication policies.",
 ]
 
+[[examples.operations]]
+name = "Create namespace with labels"
+
+[[examples.operations]]
+name = "Deploy microservice Deployments"
+
+[[examples.operations]]
+name = "Create ClusterIP Services"
+
+[[examples.operations]]
+name = "Install Istio sidecar injection"
+
+[[examples.operations]]
+name = "Configure VirtualService routing"
+
+[[examples.operations]]
+name = "Define DestinationRules with subsets"
+
+[[examples.operations]]
+name = "Set canary weight-based traffic split"
+
+[[examples.operations]]
+name = "Enable mTLS with PeerAuthentication"
+
+[[examples.operations]]
+name = "Add circuit breaker policies"
+
+[[examples.operations]]
+name = "Configure rate limiting with EnvoyFilter"
+
+[[examples.operations]]
+name = "Set up HPA for each service"
+
+
 [[examples]]
 task = "Implement a rate limiter with sliding window and distributed state"
-operations = [
-    {name = "Design sliding window algorithm",                      type = "python"},
-    {name = "Implement token bucket core",                         type = "python"},
-    {name = "Add sliding window counter with timestamps",          type = "python"},
-    {name = "Integrate Redis as distributed backend",              type = "python"},
-    {name = "Handle race conditions with Lua atomics",             type = "python"},
-    {name = "Add middleware hook for HTTP frameworks",             type = "python"},
-    {name = "Emit rate limit metrics (allowed/rejected/remaining)", type = "python"},
-    {name = "Write unit and integration tests",                    type = "python"},
-]
 
 [examples.prompts]
-verbose = """I need to implement a rate limiter for our API. It should use a sliding window \
+verbose = """\
+I need to implement a rate limiter for our API. It should use a sliding window \
 algorithm, not a fixed window, so we don't get burst issues at window boundaries. \
 Start by designing the sliding window approach — I'm thinking a hybrid of fixed \
 window counters with interpolation. Implement the core token bucket logic first. \
@@ -335,23 +446,37 @@ assumption_led = [
     "Re-executing with in-memory sliding window rate limiter suitable for single-instance deployment.",
 ]
 
+[[examples.operations]]
+name = "Design sliding window algorithm"
+
+[[examples.operations]]
+name = "Implement token bucket core"
+
+[[examples.operations]]
+name = "Add sliding window counter with timestamps"
+
+[[examples.operations]]
+name = "Integrate Redis as distributed backend"
+
+[[examples.operations]]
+name = "Handle race conditions with Lua atomics"
+
+[[examples.operations]]
+name = "Add middleware hook for HTTP frameworks"
+
+[[examples.operations]]
+name = "Emit rate limit metrics (allowed/rejected/remaining)"
+
+[[examples.operations]]
+name = "Write unit and integration tests"
+
+
 [[examples]]
 task = "Provision multi-region AWS infrastructure with DR failover"
-operations = [
-    {name = "Define provider configs for both regions",           type = "config"},
-    {name = "Create VPCs with subnets per region",               type = "config"},
-    {name = "Set up RDS primary with cross-region read replica",  type = "config"},
-    {name = "Configure Route53 health checks",                   type = "config"},
-    {name = "Set up Route53 failover routing policy",            type = "config"},
-    {name = "Create S3 buckets with cross-region replication",   type = "config"},
-    {name = "Configure CloudFront with multi-origin failover",   type = "config"},
-    {name = "Create IAM roles and policies",                     type = "config"},
-    {name = "Extract reusable Terraform modules",                type = "config"},
-    {name = "Configure remote state with DynamoDB locking",      type = "config"},
-]
 
 [examples.prompts]
-verbose = """I need to provision multi-region infrastructure on AWS using Terraform. We need \
+verbose = """\
+I need to provision multi-region infrastructure on AWS using Terraform. We need \
 disaster recovery with automatic failover. First, define provider configurations \
 for us-east-1 (primary) and us-west-2 (DR). Create a VPC in each region with \
 public and private subnets across multiple AZs. Set up an RDS PostgreSQL instance \
@@ -383,22 +508,43 @@ assumption_led = [
     "Re-executing with eu-west-1 as the DR region and updated provider configurations.",
 ]
 
+[[examples.operations]]
+name = "Define provider configs for both regions"
+
+[[examples.operations]]
+name = "Create VPCs with subnets per region"
+
+[[examples.operations]]
+name = "Set up RDS primary with cross-region read replica"
+
+[[examples.operations]]
+name = "Configure Route53 health checks"
+
+[[examples.operations]]
+name = "Set up Route53 failover routing policy"
+
+[[examples.operations]]
+name = "Create S3 buckets with cross-region replication"
+
+[[examples.operations]]
+name = "Configure CloudFront with multi-origin failover"
+
+[[examples.operations]]
+name = "Create IAM roles and policies"
+
+[[examples.operations]]
+name = "Extract reusable Terraform modules"
+
+[[examples.operations]]
+name = "Configure remote state with DynamoDB locking"
+
+
 [[examples]]
 task = "Configure hardened Linux fleet with CIS benchmarks and monitoring"
-operations = [
-    {name = "Create Ansible inventory with host groups",                      type = "config"},
-    {name = "Write SSH hardening role (disable root, key-only auth)",        type = "config"},
-    {name = "Apply CIS Level 1 benchmark tasks (kernel params, filesystem)", type = "config"},
-    {name = "Configure firewalld/iptables rules",                            type = "bash"},
-    {name = "Deploy Prometheus node_exporter",                               type = "bash"},
-    {name = "Configure Filebeat for centralized logging",                    type = "config"},
-    {name = "Set up unattended security upgrades",                           type = "config"},
-    {name = "Create users with sudo rules (no NOPASSWD)",                    type = "bash"},
-    {name = "Run OpenSCAP compliance scan and generate report",              type = "bash"},
-]
 
 [examples.prompts]
-verbose = """I need to configure our Linux server fleet using Ansible to meet security \
+verbose = """\
+I need to configure our Linux server fleet using Ansible to meet security \
 requirements. First, create an inventory file that groups hosts by role — web \
 servers, app servers, and databases. Write a hardening role that disables root \
 SSH login, enforces key-only authentication, sets idle timeout, and disables \
@@ -431,17 +577,40 @@ assumption_led = [
     "Re-executing with Splunk Universal Forwarder instead of Filebeat for log shipping.",
 ]
 
+[[examples.operations]]
+name = "Create Ansible inventory with host groups"
+
+[[examples.operations]]
+name = "Write SSH hardening role (disable root, key-only auth)"
+
+[[examples.operations]]
+name = "Apply CIS Level 1 benchmark tasks (kernel params, filesystem)"
+
+[[examples.operations]]
+name = "Configure firewalld/iptables rules"
+
+[[examples.operations]]
+name = "Deploy Prometheus node_exporter"
+
+[[examples.operations]]
+name = "Configure Filebeat for centralized logging"
+
+[[examples.operations]]
+name = "Set up unattended security upgrades"
+
+[[examples.operations]]
+name = "Create users with sudo rules (no NOPASSWD)"
+
+[[examples.operations]]
+name = "Run OpenSCAP compliance scan and generate report"
+
+
 [[examples]]
 task = "Build me a patient risk calculator."
-operations = [
-    {name = "Input form: age, prior admissions, department, diagnosis code",                                    type = "python"},
-    {name = "Weighted risk score: (prior_admissions\u00d70.4) + (age_factor\u00d70.3) + (diagnosis_factor\u00d70.3)", type = "python"},
-    {name = "Color-coded badge: HIGH / MEDIUM / LOW with thresholds",                                          type = "python"},
-    {name = "Per-factor formula breakdown below the badge",                                                    type = "python"},
-]
 
 [examples.prompts]
-verbose = """I need to build a patient risk calculator as a web application. The app needs an \
+verbose = """\
+I need to build a patient risk calculator as a web application. The app needs an \
 input form where users can enter patient data including age, number of prior admissions, \
 department selection, and primary diagnosis code. Based on these inputs, compute a \
 weighted risk score using the formula: (prior_admissions x 0.4) + (age_factor x 0.3) + \
@@ -466,9 +635,9 @@ Streamlit app computing a readmission risk score from patient inputs.
 ### Requirements
 
 1. Input form: age, prior admissions count, department (select), primary diagnosis code
-2. Compute risk score: (prior_admissions \u00d7 0.4) + (age_factor \u00d7 0.3) + (diagnosis_factor \u00d7 0.3)
-3. Color-coded badge: HIGH (score \u2265 0.7), MEDIUM (0.4\u20130.69), LOW (< 0.4)
-4. Formula breakdown below the badge \u2014 each factor labeled with its weight
+2. Compute risk score: (prior_admissions × 0.4) + (age_factor × 0.3) + (diagnosis_factor × 0.3)
+3. Color-coded badge: HIGH (score ≥ 0.7), MEDIUM (0.4–0.69), LOW (< 0.4)
+4. Formula breakdown below the badge — each factor labeled with its weight
 
 ### Constraints
 
@@ -481,3 +650,15 @@ assumption_led = [
     "Correction: formula weights should be equal (0.33 each), not the provided distribution.",
     "Re-executing with equal-weighted formula where each factor contributes equally to the risk score.",
 ]
+
+[[examples.operations]]
+name = "Input form: age, prior admissions, department, diagnosis code"
+
+[[examples.operations]]
+name = "Weighted risk score: (prior_admissions×0.4) + (age_factor×0.3) + (diagnosis_factor×0.3)"
+
+[[examples.operations]]
+name = "Color-coded badge: HIGH / MEDIUM / LOW with thresholds"
+
+[[examples.operations]]
+name = "Per-factor formula breakdown below the badge"

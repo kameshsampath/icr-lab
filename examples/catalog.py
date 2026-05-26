@@ -1,9 +1,20 @@
-"""Catalog loader — reads examples/catalog.toml at startup and indexes by task name."""
+"""Catalog loader — reads examples/catalog.toml at startup and indexes by task name.
+
+SECURITY: operation names are display data only.
+Never pass to subprocess, eval, or any SQL/shell execution context.
+"""
 
 import tomllib
 from pathlib import Path
 
 _CATALOG: dict[str, dict] | None = None
+
+
+def _sanitize_op(op: dict) -> dict:
+    """Strip control chars and cap length on op names at load time."""
+    name = str(op.get("name", "")).replace("\x00", "").strip()[:500]
+    return {"name": name}
+
 
 _MODE_KEY_MAP = {
     "Verbose Prompting": "verbose",
@@ -19,7 +30,14 @@ def _load() -> dict[str, dict]:
     global _CATALOG
     if _CATALOG is None:
         with open(Path(__file__).parent / "catalog.toml", "rb") as f:
-            _CATALOG = {e["task"]: e for e in tomllib.load(f)["examples"]}
+            data = tomllib.load(f)
+        _CATALOG = {
+            e["task"]: {
+                **e,
+                "operations": [_sanitize_op(o) for o in e.get("operations", [])],
+            }
+            for e in data["examples"]
+        }
     return _CATALOG
 
 
@@ -34,14 +52,6 @@ def get_operation_names(task: str) -> list[str]:
     if e is None:
         return []
     return [o["name"] for o in e.get("operations", [])]
-
-
-def get_operation_types(task: str) -> list[str]:
-    """Return list of operation type strings for a task."""
-    e = get_example(task)
-    if e is None:
-        return []
-    return [o["type"] for o in e.get("operations", [])]
 
 
 def get_optimized_prompt(task: str) -> str:

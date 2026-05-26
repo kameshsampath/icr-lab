@@ -72,7 +72,62 @@ with st.sidebar:
 
     st.divider()
 
-    # Output compression toggle
+    # Assumption accuracy slider
+    st.markdown("**Assumption Accuracy**")
+    assumption_accuracy = st.slider(
+        "Model accuracy on assumptions",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.85,
+        step=0.05,
+        help=(
+            "Only affects Assumption Led mode. "
+            "1.0 = perfect assumptions (0 wrong), "
+            "0.0 = all assumptions wrong. "
+            "Try 0.85 for a strong model or 0.60 for a mid-tier model."
+        ),
+    )
+
+    # Live status badge — visible inline below the slider
+    if task_input and "Assumption Led" in (selected_modes or []):
+        from simulations.engine import _task_complexity  # noqa: PLC0415
+
+        _c = _task_complexity(task_input)
+        _total_a = 1 + (_c % 3)
+        _wrong = min(math.ceil(_total_a * (1 - assumption_accuracy)), _total_a)
+        _rounds = 1 + (_wrong * 2 if _wrong > 0 else 0)
+        _ops_preview = st.session_state.get("operations")
+        _ops_achieved = (
+            math.floor(_ops_preview * assumption_accuracy) if _ops_preview else None
+        )
+
+        _sc1, _sc2, _sc3, _sc4 = st.columns(4)
+        _sc1.metric("Wrong", f"{_wrong}/{_total_a}", help="Wrong assumptions / total")
+        _sc2.metric("Rounds", _rounds, help="Correction rounds needed")
+        if _ops_achieved is not None:
+            _sc3.metric(
+                "Ops", f"{_ops_achieved}/{_ops_preview}", help="Ops achieved / total"
+            )
+        _sc4.metric("Accuracy", f"{int(assumption_accuracy * 100)}%")
+
+    st.divider()
+
+    # Requirements — pre-filled from catalog, editable by user
+    st.markdown("**Requirements**")
+    _catalog_reqs = get_operation_commands(task_input) if task_input else []
+    _default_reqs = "\n".join(_catalog_reqs)
+    requirements_text = st.text_area(
+        "One requirement per line",
+        value=_default_reqs,
+        height=90,
+        key=f"reqs_{task_input[:60] if task_input else ''}",
+        help="Pre-filled from the task catalog. Add, remove, or edit as needed.",
+    )
+    requirements_list = [r.strip() for r in requirements_text.splitlines() if r.strip()]
+
+    st.divider()
+
+    # Output compression toggle (secondary control — placed last)
     st.markdown("**Output Compression**")
     apply_compression = st.toggle(
         "Caveman-style compression",
@@ -90,59 +145,6 @@ with st.sidebar:
         )
     else:
         compression_factor = 1.0
-
-    st.divider()
-
-    # Assumption accuracy slider
-    st.markdown("**Assumption Accuracy**")
-    assumption_accuracy = st.slider(
-        "Model accuracy on assumptions",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.85,
-        step=0.05,
-        help=(
-            "Only affects Assumption Led mode. "
-            "1.0 = perfect assumptions (0 wrong), "
-            "0.0 = all assumptions wrong. "
-            "Try 0.85 for a strong model or 0.60 for a mid-tier model."
-        ),
-    )
-
-    # Live status — computed from current task without a full simulation run
-    if task_input and "Assumption Led" in (selected_modes or []):
-        from simulations.engine import _task_complexity  # noqa: PLC0415
-
-        _c = _task_complexity(task_input)
-        _total_a = 1 + (_c % 3)
-        _wrong = min(math.ceil(_total_a * (1 - assumption_accuracy)), _total_a)
-        _rounds = 1 + (_wrong * 2 if _wrong > 0 else 0)
-        # ops preview uses the same floor formula as the engine
-        _ops_preview = st.session_state.get("operations")
-        _ops_str = (
-            f" · {math.floor(_ops_preview * assumption_accuracy)}/{_ops_preview} ops"
-            if _ops_preview
-            else ""
-        )
-        st.caption(
-            f"Assumption Led — {_total_a} assumption(s) · "
-            f"**{_wrong} wrong** · {_rounds} round(s){_ops_str}"
-        )
-
-    st.divider()
-
-    # Requirements — pre-filled from catalog, editable by user
-    st.markdown("**Requirements**")
-    _catalog_reqs = get_operation_commands(task_input) if task_input else []
-    _default_reqs = "\n".join(_catalog_reqs)
-    requirements_text = st.text_area(
-        "One requirement per line",
-        value=_default_reqs,
-        height=90,
-        key=f"reqs_{task_input[:60] if task_input else ''}",
-        help="Pre-filled from the task catalog. Add, remove, or edit as needed.",
-    )
-    requirements_list = [r.strip() for r in requirements_text.splitlines() if r.strip()]
 
     st.divider()
     run_clicked = st.button(

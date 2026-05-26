@@ -9,6 +9,7 @@ SECURITY: operation names from catalog are display data only — never execute t
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
 
+from examples.sample_tasks import get_operations_count
 from metrics.calculator import compute_metrics, compute_savings
 from simulations.engine import run_simulation
 
@@ -17,7 +18,7 @@ app = FastAPI(title="ICR Lab Simulation API")
 
 class SimulateRequest(BaseModel):
     task: str
-    operations: int
+    operations: int | None = None  # auto-derived from catalog when omitted
     requirements: list[str] = []
     modes: list[str] | None = None
     mode_operations_achieved: dict[str, int] = {}
@@ -45,8 +46,13 @@ def health():
 
 @app.post("/simulate")
 def simulate(req: SimulateRequest):
+    # Resolve operations: use explicit value or derive from catalog/heuristic
+    operations = (
+        req.operations if req.operations is not None else get_operations_count(req.task)
+    )
+
     # Run simulation for the requested modes
-    results = run_simulation(req.task, req.operations, req.modes)
+    results = run_simulation(req.task, operations, req.modes)
 
     # Override per-mode operations_achieved BEFORE compute_metrics
     if req.mode_operations_achieved:
@@ -116,7 +122,7 @@ def simulate(req: SimulateRequest):
 
     return {
         "task": req.task,
-        "operations": req.operations,
+        "operations": operations,
         "token_metrics": token_metrics,
         "trace": trace,
         "requirements_coverage": requirements_coverage,

@@ -256,9 +256,11 @@ class TestEdgeCases:
         req = {k: v for k, v in CANONICAL_REQUEST.items() if k != "task"}
         assert client.post("/simulate", json=req).status_code == 422
 
-    def test_missing_operations_field_returns_422(self, client):
+    def test_missing_operations_field_auto_derived(self, client):
         req = {k: v for k, v in CANONICAL_REQUEST.items() if k != "operations"}
-        assert client.post("/simulate", json=req).status_code == 422
+        resp = client.post("/simulate", json=req)
+        assert resp.status_code == 200
+        assert resp.json()["operations"] == 4  # auto-derived from catalog
 
     def test_negative_operations_rejected_or_normalised(self, client):
         req = {**CANONICAL_REQUEST, "operations": -1}

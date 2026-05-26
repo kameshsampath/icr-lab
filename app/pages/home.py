@@ -1,5 +1,6 @@
 """Home — ICR and Token Economics dashboard."""
 
+import math
 import sys
 from pathlib import Path
 
@@ -106,6 +107,38 @@ with st.sidebar:
             "Try 0.85 for a strong model or 0.60 for a mid-tier model."
         ),
     )
+
+    # Live status — computed from current task without a full simulation run
+    if task_input and "Assumption Led" in (selected_modes or []):
+        from simulations.engine import _task_complexity  # noqa: PLC0415
+
+        _c = _task_complexity(task_input)
+        _total_a = 1 + (_c % 3)
+        _wrong = min(math.ceil(_total_a * (1 - assumption_accuracy)), _total_a)
+        _unrecovered = max(0, _wrong - (1 if _wrong > 0 else 0))
+        _rounds = 1 + (_wrong * 2 if _wrong > 0 else 0)
+        st.caption(
+            f"Assumption Led — {_total_a} assumption(s) · "
+            f"**{_wrong} wrong** · {_unrecovered} unrecovered · "
+            f"{_rounds} round(s)"
+        )
+        if _total_a == 1 and assumption_accuracy < 1.0:
+            st.caption(
+                "⚠ This task has 1 assumption — any accuracy below 1.0 "
+                "produces the same correction path. "
+                "Try a task like **Deploy a connector with Snowflake Openflow** "
+                "(3 assumptions) to see graded impact."
+            )
+        elif _total_a > 1:
+            # Compute next threshold where wrong count increases
+            for _test_acc in [
+                round(x * 0.01, 2)
+                for x in range(int(assumption_accuracy * 100) - 1, -1, -1)
+            ]:
+                _w2 = min(math.ceil(_total_a * (1 - _test_acc)), _total_a)
+                if _w2 > _wrong:
+                    st.caption(f"Next change at accuracy ≤ {_test_acc:.2f}")
+                    break
 
     st.divider()
 

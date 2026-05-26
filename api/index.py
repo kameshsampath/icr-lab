@@ -6,22 +6,12 @@ so Phase A demo evidence is reproducible across runs.
 SECURITY: operation names from catalog are display data only — never execute them.
 """
 
-import sys
-from pathlib import Path
+from fastapi import FastAPI
+from pydantic import BaseModel, field_validator
 
-# Ensure project root is on sys.path so local packages are importable
-# regardless of whether the file is run directly, via uvicorn, or as a
-# Vercel serverless function from the api/ directory.
-_ROOT = Path(__file__).resolve().parent.parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-
-from fastapi import FastAPI  # noqa: E402
-from pydantic import BaseModel, field_validator  # noqa: E402
-
-from examples.sample_tasks import get_operations_count  # noqa: E402
-from metrics.calculator import compute_metrics, compute_savings  # noqa: E402
-from simulations.engine import run_simulation  # noqa: E402
+from examples.sample_tasks import get_operations_count
+from metrics.calculator import compute_metrics, compute_savings
+from simulations.engine import run_simulation
 
 app = FastAPI(title="ICR Lab Simulation API")
 

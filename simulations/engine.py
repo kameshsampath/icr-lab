@@ -177,14 +177,17 @@ def _simulate_assumption_led(
         operations: Number of operations the task requires.
         accuracy: Fraction of assumptions that are correct (0.0–1.0).
                   1.0 = perfect (0 wrong), 0.0 = all wrong.
+
+    ops_achieved scales directly with accuracy so that every task shows
+    visible coverage changes across the full slider range, regardless of
+    total_a (number of assumptions derived from task complexity).
+    wrong count still drives correction-round structure for token inflation.
     """
     c = _task_complexity(task)
     total_a = 1 + (c % 3)
     wrong = min(math.ceil(total_a * (1 - accuracy)), total_a)
-    # Correction rounds recover all but the last wrong assumption (still misses work)
-    unrecovered = max(0, wrong - (1 if wrong > 0 else 0))
-    ops_missed = math.ceil(unrecovered * operations / total_a) if total_a > 0 else 0
-    ops_achieved = max(0, operations - ops_missed)
+    # Direct proportional model: accuracy fraction of ops actually complete
+    ops_achieved = math.floor(operations * accuracy)
     result = _build_result(
         "Assumption Led",
         _base_tokens(task),

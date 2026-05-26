@@ -235,6 +235,8 @@ def apply_output_compression(
                     cumulative_tokens=cumulative,
                     description=rd.description,
                     prompt_text=rd.prompt_text,
+                    token_source=rd.token_source,
+                    assumptions=rd.assumptions,
                 )
             )
         total_input = sum(rd.input_tokens for rd in new_rounds)
@@ -248,6 +250,8 @@ def apply_output_compression(
                 total_tokens=total_input + total_output,
                 operations_achieved=r.operations_achieved,
                 optimized_prompt=r.optimized_prompt,
+                total_assumptions=r.total_assumptions,
+                wrong_assumptions=r.wrong_assumptions,
             )
         )
     return compressed

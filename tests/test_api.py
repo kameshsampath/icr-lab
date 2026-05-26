@@ -426,7 +426,17 @@ class TestNewFields:
         }
         data = client.post("/simulate", json=req).json()
         ops_by_type = data["token_metrics"]["Intent-Optimized"]["ops_by_type"]
-        # patient-risk-calculator is in catalog, so ops_by_type should be non-empty
-        # and sum to 4
-        if ops_by_type:
-            assert sum(ops_by_type.values()) == 4
+        assert ops_by_type, "ops_by_type must be non-empty for a catalog task"
+        assert sum(ops_by_type.values()) == 4
+
+    def test_ops_by_type_empty_for_unknown_task(self, client):
+        """Non-catalog task has no typed ops — ops_by_type should return {}."""
+        req = {
+            **CANONICAL_REQUEST,
+            "task": "A completely unknown task xyz not in catalog.",
+        }
+        data = client.post("/simulate", json=req).json()
+        for mode_metrics in data["token_metrics"].values():
+            assert mode_metrics["ops_by_type"] == {}, (
+                "Non-catalog task must return empty ops_by_type"
+            )

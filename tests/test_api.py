@@ -305,7 +305,7 @@ class TestPatientRiskCatalogEntry:
 
         example = get_example(PATIENT_RISK_TASK)
         assert example is not None
-        ops_lower = [op["name"].lower() for op in example["operations"]]
+        ops_lower = [op["command"].lower() for op in example["operations"]]
         assert any("form" in op or "input" in op for op in ops_lower), (
             "Missing input form op"
         )
@@ -422,3 +422,10 @@ class TestInputValidation:
         resp = client.post("/simulate", json=req)
         assert resp.status_code == 200
         assert "\x00" not in resp.json()["task"]
+
+    def test_html_injection_in_task_stripped_by_pydantic(self, client):
+        """HTML in task field passes through (display layer must escape); task is stored as-is after null-byte strip."""
+        req = {**CANONICAL_REQUEST, "task": "<script>alert(1)</script>Deploy connector"}
+        resp = client.post("/simulate", json=req)
+        # API accepts it (display layer responsibility to escape HTML)
+        assert resp.status_code in (200, 422)

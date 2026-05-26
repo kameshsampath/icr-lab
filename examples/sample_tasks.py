@@ -15,10 +15,10 @@ def _ui_tasks() -> list[str]:
 def _build_action_words() -> frozenset[str]:
     """First word of every op name in catalog — auto-derived action verb set."""
     return frozenset(
-        op["name"].split()[0].lower()
+        op["command"].split()[0].lower()
         for entry in _load().values()
         for op in entry.get("operations", [])
-        if op.get("name")
+        if op.get("command")
     )
 
 

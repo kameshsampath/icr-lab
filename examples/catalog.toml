@@ -35,40 +35,40 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Create service user"
+command = "Create service user"
 
 [[examples.operations]]
-name = "Create service role"
+command = "Create service role"
 
 [[examples.operations]]
-name = "Grant role to user"
+command = "Grant role to user"
 
 [[examples.operations]]
-name = "Create network rule"
+command = "Create network rule"
 
 [[examples.operations]]
-name = "Create network policy"
+command = "Create network policy"
 
 [[examples.operations]]
-name = "Attach network policy to user"
+command = "Attach network policy to user"
 
 [[examples.operations]]
-name = "Create authentication policy"
+command = "Create authentication policy"
 
 [[examples.operations]]
-name = "Attach authentication policy to user"
+command = "Attach authentication policy to user"
 
 [[examples.operations]]
-name = "Configure PAT policy constraints"
+command = "Configure PAT policy constraints"
 
 [[examples.operations]]
-name = "Generate PAT"
+command = "Generate PAT"
 
 [[examples.operations]]
-name = "Store PAT securely for client usage"
+command = "Store PAT securely for client usage"
 
 [[examples.operations]]
-name = "Validate token exchange via Apache NiPyAPI"
+command = "Validate token exchange via Apache NiPyAPI"
 
 
 [[examples]]
@@ -103,31 +103,31 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Build container image"
+command = "Build container image"
 
 [[examples.operations]]
-name = "Push to registry"
+command = "Push to registry"
 
 [[examples.operations]]
-name = "Create Kubernetes deployment"
+command = "Create Kubernetes deployment"
 
 [[examples.operations]]
-name = "Configure HPA autoscaling"
+command = "Configure HPA autoscaling"
 
 [[examples.operations]]
-name = "Set up service and ingress"
+command = "Set up service and ingress"
 
 [[examples.operations]]
-name = "Deploy Prometheus metrics exporter"
+command = "Deploy Prometheus metrics exporter"
 
 [[examples.operations]]
-name = "Configure Grafana dashboards"
+command = "Configure Grafana dashboards"
 
 [[examples.operations]]
-name = "Set up alerting rules"
+command = "Set up alerting rules"
 
 [[examples.operations]]
-name = "Configure distributed tracing"
+command = "Configure distributed tracing"
 
 
 [[examples]]
@@ -161,22 +161,22 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Create storage integration"
+command = "Create storage integration"
 
 [[examples.operations]]
-name = "Configure IAM roles"
+command = "Configure IAM roles"
 
 [[examples.operations]]
-name = "Create external volume"
+command = "Create external volume"
 
 [[examples.operations]]
-name = "Validate access"
+command = "Validate access"
 
 [[examples.operations]]
-name = "Create catalog integration"
+command = "Create catalog integration"
 
 [[examples.operations]]
-name = "Create Iceberg table"
+command = "Create Iceberg table"
 
 
 [[examples]]
@@ -212,28 +212,28 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Audit current auth implementation"
+command = "Audit current auth implementation"
 
 [[examples.operations]]
-name = "Design OAuth2 flow"
+command = "Design OAuth2 flow"
 
 [[examples.operations]]
-name = "Implement token endpoint"
+command = "Implement token endpoint"
 
 [[examples.operations]]
-name = "Add refresh token logic"
+command = "Add refresh token logic"
 
 [[examples.operations]]
-name = "Update middleware"
+command = "Update middleware"
 
 [[examples.operations]]
-name = "Migrate session handling"
+command = "Migrate session handling"
 
 [[examples.operations]]
-name = "Update API clients"
+command = "Update API clients"
 
 [[examples.operations]]
-name = "Add PKCE support"
+command = "Add PKCE support"
 
 
 [[examples]]
@@ -271,34 +271,34 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Configure source database CDC"
+command = "Configure source database CDC"
 
 [[examples.operations]]
-name = "Set up Kafka Connect source connector"
+command = "Set up Kafka Connect source connector"
 
 [[examples.operations]]
-name = "Create Kafka topics with schemas"
+command = "Create Kafka topics with schemas"
 
 [[examples.operations]]
-name = "Implement stream processing transforms"
+command = "Implement stream processing transforms"
 
 [[examples.operations]]
-name = "Configure sink connector"
+command = "Configure sink connector"
 
 [[examples.operations]]
-name = "Set up schema registry"
+command = "Set up schema registry"
 
 [[examples.operations]]
-name = "Implement dead letter queue"
+command = "Implement dead letter queue"
 
 [[examples.operations]]
-name = "Configure monitoring"
+command = "Configure monitoring"
 
 [[examples.operations]]
-name = "Set up data quality checks"
+command = "Set up data quality checks"
 
 [[examples.operations]]
-name = "Implement backfill strategy"
+command = "Implement backfill strategy"
 
 
 [[examples]]
@@ -329,16 +329,16 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Define network rule"
+command = "Define network rule"
 
 [[examples.operations]]
-name = "Create network policy"
+command = "Create network policy"
 
 [[examples.operations]]
-name = "Attach policy to account/user"
+command = "Attach policy to account/user"
 
 [[examples.operations]]
-name = "Validate connectivity"
+command = "Validate connectivity"
 
 
 [[examples]]
@@ -378,37 +378,37 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Create namespace with labels"
+command = "Create namespace with labels"
 
 [[examples.operations]]
-name = "Deploy microservice Deployments"
+command = "Deploy microservice Deployments"
 
 [[examples.operations]]
-name = "Create ClusterIP Services"
+command = "Create ClusterIP Services"
 
 [[examples.operations]]
-name = "Install Istio sidecar injection"
+command = "Install Istio sidecar injection"
 
 [[examples.operations]]
-name = "Configure VirtualService routing"
+command = "Configure VirtualService routing"
 
 [[examples.operations]]
-name = "Define DestinationRules with subsets"
+command = "Define DestinationRules with subsets"
 
 [[examples.operations]]
-name = "Set canary weight-based traffic split"
+command = "Set canary weight-based traffic split"
 
 [[examples.operations]]
-name = "Enable mTLS with PeerAuthentication"
+command = "Enable mTLS with PeerAuthentication"
 
 [[examples.operations]]
-name = "Add circuit breaker policies"
+command = "Add circuit breaker policies"
 
 [[examples.operations]]
-name = "Configure rate limiting with EnvoyFilter"
+command = "Configure rate limiting with EnvoyFilter"
 
 [[examples.operations]]
-name = "Set up HPA for each service"
+command = "Set up HPA for each service"
 
 
 [[examples]]
@@ -447,28 +447,28 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Design sliding window algorithm"
+command = "Design sliding window algorithm"
 
 [[examples.operations]]
-name = "Implement token bucket core"
+command = "Implement token bucket core"
 
 [[examples.operations]]
-name = "Add sliding window counter with timestamps"
+command = "Add sliding window counter with timestamps"
 
 [[examples.operations]]
-name = "Integrate Redis as distributed backend"
+command = "Integrate Redis as distributed backend"
 
 [[examples.operations]]
-name = "Handle race conditions with Lua atomics"
+command = "Handle race conditions with Lua atomics"
 
 [[examples.operations]]
-name = "Add middleware hook for HTTP frameworks"
+command = "Add middleware hook for HTTP frameworks"
 
 [[examples.operations]]
-name = "Emit rate limit metrics (allowed/rejected/remaining)"
+command = "Emit rate limit metrics (allowed/rejected/remaining)"
 
 [[examples.operations]]
-name = "Write unit and integration tests"
+command = "Write unit and integration tests"
 
 
 [[examples]]
@@ -509,34 +509,34 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Define provider configs for both regions"
+command = "Define provider configs for both regions"
 
 [[examples.operations]]
-name = "Create VPCs with subnets per region"
+command = "Create VPCs with subnets per region"
 
 [[examples.operations]]
-name = "Set up RDS primary with cross-region read replica"
+command = "Set up RDS primary with cross-region read replica"
 
 [[examples.operations]]
-name = "Configure Route53 health checks"
+command = "Configure Route53 health checks"
 
 [[examples.operations]]
-name = "Set up Route53 failover routing policy"
+command = "Set up Route53 failover routing policy"
 
 [[examples.operations]]
-name = "Create S3 buckets with cross-region replication"
+command = "Create S3 buckets with cross-region replication"
 
 [[examples.operations]]
-name = "Configure CloudFront with multi-origin failover"
+command = "Configure CloudFront with multi-origin failover"
 
 [[examples.operations]]
-name = "Create IAM roles and policies"
+command = "Create IAM roles and policies"
 
 [[examples.operations]]
-name = "Extract reusable Terraform modules"
+command = "Extract reusable Terraform modules"
 
 [[examples.operations]]
-name = "Configure remote state with DynamoDB locking"
+command = "Configure remote state with DynamoDB locking"
 
 
 [[examples]]
@@ -578,31 +578,31 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Create Ansible inventory with host groups"
+command = "Create Ansible inventory with host groups"
 
 [[examples.operations]]
-name = "Write SSH hardening role (disable root, key-only auth)"
+command = "Write SSH hardening role (disable root, key-only auth)"
 
 [[examples.operations]]
-name = "Apply CIS Level 1 benchmark tasks (kernel params, filesystem)"
+command = "Apply CIS Level 1 benchmark tasks (kernel params, filesystem)"
 
 [[examples.operations]]
-name = "Configure firewalld/iptables rules"
+command = "Configure firewalld/iptables rules"
 
 [[examples.operations]]
-name = "Deploy Prometheus node_exporter"
+command = "Deploy Prometheus node_exporter"
 
 [[examples.operations]]
-name = "Configure Filebeat for centralized logging"
+command = "Configure Filebeat for centralized logging"
 
 [[examples.operations]]
-name = "Set up unattended security upgrades"
+command = "Set up unattended security upgrades"
 
 [[examples.operations]]
-name = "Create users with sudo rules (no NOPASSWD)"
+command = "Create users with sudo rules (no NOPASSWD)"
 
 [[examples.operations]]
-name = "Run OpenSCAP compliance scan and generate report"
+command = "Run OpenSCAP compliance scan and generate report"
 
 
 [[examples]]
@@ -652,13 +652,13 @@ assumption_led = [
 ]
 
 [[examples.operations]]
-name = "Input form: age, prior admissions, department, diagnosis code"
+command = "Input form: age, prior admissions, department, diagnosis code"
 
 [[examples.operations]]
-name = "Weighted risk score: (prior_admissions×0.4) + (age_factor×0.3) + (diagnosis_factor×0.3)"
+command = "Weighted risk score: (prior_admissions×0.4) + (age_factor×0.3) + (diagnosis_factor×0.3)"
 
 [[examples.operations]]
-name = "Color-coded badge: HIGH / MEDIUM / LOW with thresholds"
+command = "Color-coded badge: HIGH / MEDIUM / LOW with thresholds"
 
 [[examples.operations]]
-name = "Per-factor formula breakdown below the badge"
+command = "Per-factor formula breakdown below the badge"

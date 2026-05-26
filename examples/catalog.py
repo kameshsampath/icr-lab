@@ -1,19 +1,24 @@
 """Catalog loader — reads examples/catalog.toml at startup and indexes by task name.
 
-SECURITY: operation names are display data only.
-Never pass to subprocess, eval, or any SQL/shell execution context.
+SECURITY: operation commands are display data only.
+Never pass to subprocess, eval, shell, or any SQL/database execution context.
 """
 
+import re
 import tomllib
 from pathlib import Path
 
 _CATALOG: dict[str, dict] | None = None
 
+# Matches any HTML/XML tag — stripped from command strings before storage
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+
 
 def _sanitize_op(op: dict) -> dict:
-    """Strip control chars and cap length on op names at load time."""
-    name = str(op.get("name", "")).replace("\x00", "").strip()[:500]
-    return {"name": name}
+    """Strip null bytes, HTML tags, and cap length on op command strings at load time."""
+    raw = str(op.get("command", "")).replace("\x00", "")
+    clean = _HTML_TAG_RE.sub("", raw).strip()[:500]
+    return {"command": clean}
 
 
 _MODE_KEY_MAP = {
@@ -46,12 +51,12 @@ def get_example(task: str) -> dict | None:
     return _load().get(task)
 
 
-def get_operation_names(task: str) -> list[str]:
-    """Return list of operation name strings for a task."""
+def get_operation_commands(task: str) -> list[str]:
+    """Return list of operation command strings for a task."""
     e = get_example(task)
     if e is None:
         return []
-    return [o["name"] for o in e.get("operations", [])]
+    return [o["command"] for o in e.get("operations", [])]
 
 
 def get_optimized_prompt(task: str) -> str:

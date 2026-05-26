@@ -34,7 +34,7 @@ with st.sidebar:
     # Example task selection
     example_choice = st.selectbox(
         "Example Tasks",
-        options=["(custom)"] + SAMPLE_TASKS,
+        options=["(custom)"] + sorted(SAMPLE_TASKS),
         index=0,
         help="Select a pre-built task or write your own below",
     )
@@ -55,11 +55,12 @@ with st.sidebar:
 
     st.divider()
 
-    # Mode selection
-    selected_modes = st.multiselect(
+    # Mode selection — pills are more compact than multiselect in a narrow sidebar
+    selected_modes = st.pills(
         "Simulation Modes",
         options=list(SIMULATION_MODES.keys()),
         default=list(SIMULATION_MODES.keys()),
+        selection_mode="multi",
         help="Select which interaction modes to compare",
     )
 

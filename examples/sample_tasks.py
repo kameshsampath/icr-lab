@@ -1,52 +1,42 @@
-"""Pre-built example tasks for ICR Lab simulations."""
+"""Pre-built example tasks for ICR Lab simulations — derived from catalog.toml."""
 
-SAMPLE_TASKS = [
-    "Deploy a connector with Snowflake Openflow",
-    "Deploy payment service with autoscaling and observability",
-    "Set up an Iceberg table with external volume",
-    "Refactor authentication module to use OAuth2",
-    "Build real-time data pipeline with CDC",
-    "Configure network access with security policies",
-    "Deploy microservices app with service mesh and canary rollouts",
-    "Implement a rate limiter with sliding window and distributed state",
-    "Provision multi-region AWS infrastructure with DR failover",
-    "Configure hardened Linux fleet with CIS benchmarks and monitoring",
-]
+from examples.catalog import _load, get_example
 
-# Mapping of tasks to their estimated operation counts
-# (used to derive complexity for simulation)
-TASK_OPERATIONS = {
-    "Deploy a connector with Snowflake Openflow": 12,
-    "Deploy payment service with autoscaling and observability": 9,
-    "Set up an Iceberg table with external volume": 6,
-    "Refactor authentication module to use OAuth2": 8,
-    "Build real-time data pipeline with CDC": 10,
-    "Configure network access with security policies": 4,
-    "Deploy microservices app with service mesh and canary rollouts": 11,
-    "Implement a rate limiter with sliding window and distributed state": 8,
-    "Provision multi-region AWS infrastructure with DR failover": 10,
-    "Configure hardened Linux fleet with CIS benchmarks and monitoring": 9,
-}
+# Tasks not shown in the UI dropdown (kept in catalog for test/API use only)
+_HIDDEN_TASKS: frozenset[str] = frozenset({"Build me a patient risk calculator."})
+
+_ACTION_WORDS: frozenset[str] | None = None
+
+
+def _ui_tasks() -> list[str]:
+    return [t for t in _load().keys() if t not in _HIDDEN_TASKS]
+
+
+def _build_action_words() -> frozenset[str]:
+    """First word of every op name in catalog — auto-derived action verb set."""
+    return frozenset(
+        op["name"].split()[0].lower()
+        for entry in _load().values()
+        for op in entry.get("operations", [])
+        if op.get("name")
+    )
+
+
+SAMPLE_TASKS = _ui_tasks()
 
 
 def get_operations_count(task: str) -> int:
-    """Estimate the number of operations for a given task."""
-    if task in TASK_OPERATIONS:
-        return TASK_OPERATIONS[task]
-    # Heuristic: estimate based on word count and action verbs
+    """Return the number of operations for a task.
+
+    For catalog tasks, returns the exact count from the catalog.
+    For unknown tasks, estimates from word count and catalog-derived action verbs.
+    """
+    global _ACTION_WORDS
+    e = get_example(task)
+    if e:
+        return len(e.get("operations", []))
+    if _ACTION_WORDS is None:
+        _ACTION_WORDS = _build_action_words()
     words = task.split()
-    action_words = {
-        "deploy",
-        "configure",
-        "set",
-        "build",
-        "create",
-        "migrate",
-        "refactor",
-        "implement",
-        "integrate",
-        "setup",
-        "install",
-    }
-    action_count = sum(1 for w in words if w.lower() in action_words)
+    action_count = sum(1 for w in words if w.lower() in _ACTION_WORDS)
     return max(3, len(words) // 2 + action_count * 2)

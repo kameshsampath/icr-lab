@@ -5,7 +5,8 @@ showing how interaction architecture affects token consumption.
 """
 
 import hashlib
-from dataclasses import dataclass
+import math
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -18,6 +19,8 @@ class InteractionRound:
     cumulative_tokens: int
     description: str
     prompt_text: str = ""
+    token_source: str = "estimated"
+    assumptions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -31,6 +34,8 @@ class SimulationResult:
     total_tokens: int
     operations_achieved: int
     optimized_prompt: str = ""
+    total_assumptions: int = 0
+    wrong_assumptions: int = 0
 
 
 def _task_complexity(task: str) -> int:
@@ -118,10 +123,80 @@ def _clarification_rounds(task: str) -> list[tuple[float, float, str]]:
     ]
 
 
-def _simulate(
-    mode: str, task: str, operations: int, round_specs: list[tuple[float, float, str]]
-) -> SimulationResult:
-    return _build_result(mode, _base_tokens(task), operations, round_specs)
+_ASSUMPTION_DESCRIPTIONS = [
+    "Agent infers missing context and executes with stated assumptions",
+    "Correction round: user identifies a wrong assumption",
+    "Re-execution with corrected parameters",
+    "Second correction: additional assumption was wrong",
+    "Final re-execution with all corrections applied",
+]
+
+
+def _assumption_led_rounds(wrong: int) -> list[tuple[float, float, str]]:
+    """Generate round specs for assumption-led mode given the number of wrong assumptions.
+
+    Round 1: agent states assumptions and executes (low input — user said little,
+    higher output — agent infers and acts). Subsequent rounds are corrections
+    for wrong assumptions.
+    """
+    rounds = [
+        (
+            0.6,
+            1.4,
+            _ASSUMPTION_DESCRIPTIONS[0],
+        )
+    ]
+    for i in range(wrong):
+        rounds.append(
+            (
+                1.8 + i * 0.4,
+                0.9,
+                _ASSUMPTION_DESCRIPTIONS[min(i + 1, len(_ASSUMPTION_DESCRIPTIONS) - 1)],
+            )
+        )
+    if wrong > 0:
+        rounds.append(
+            (
+                1.2,
+                1.6,
+                _ASSUMPTION_DESCRIPTIONS[
+                    min(wrong + 1, len(_ASSUMPTION_DESCRIPTIONS) - 1)
+                ],
+            )
+        )
+    return rounds
+
+
+def _simulate_assumption_led(
+    task: str, operations: int, accuracy: float = 1.0
+) -> "SimulationResult":
+    """Simulate Assumption Led mode with caller-controlled accuracy.
+
+    Args:
+        task: The task description.
+        operations: Number of operations the task requires.
+        accuracy: Fraction of assumptions that are correct (0.0–1.0).
+                  1.0 = perfect (0 wrong), 0.0 = all wrong.
+
+    ops_achieved scales directly with accuracy so that every task shows
+    visible coverage changes across the full slider range, regardless of
+    total_a (number of assumptions derived from task complexity).
+    wrong count still drives correction-round structure for token inflation.
+    """
+    c = _task_complexity(task)
+    total_a = 1 + (c % 3)
+    wrong = min(math.ceil(total_a * (1 - accuracy)), total_a)
+    # Direct proportional model: accuracy fraction of ops actually complete
+    ops_achieved = math.floor(operations * accuracy)
+    result = _build_result(
+        "Assumption Led",
+        _base_tokens(task),
+        ops_achieved,
+        _assumption_led_rounds(wrong),
+    )
+    result.total_assumptions = total_a
+    result.wrong_assumptions = wrong
+    return result
 
 
 _OVER_COMPRESSED_ROUNDS = [
@@ -132,6 +207,24 @@ _OVER_COMPRESSED_ROUNDS = [
     (2.0, 2.0, "Final execution after accumulated corrections"),
 ]
 
+# Natural completion fraction per mode — how many ops each mode achieves without override.
+# Clarification Heavy stalls before execution; Over Compressed misses ~half.
+_MODE_COMPLETION: dict[str, float] = {
+    "Verbose Prompting": 1.0,
+    "Clarification Heavy": 0.0,
+    "Context Aware": 1.0,
+    "Intent Optimized": 1.0,
+    "Over Compressed": 0.5,
+    "Assumption Led": 1.0,
+}
+
+
+def _simulate(
+    mode: str, task: str, operations: int, round_specs: list[tuple[float, float, str]]
+) -> SimulationResult:
+    ops_achieved = int(operations * _MODE_COMPLETION.get(mode, 1.0))
+    return _build_result(mode, _base_tokens(task), ops_achieved, round_specs)
+
 
 # Mode registry
 SIMULATION_MODES = {
@@ -141,15 +234,16 @@ SIMULATION_MODES = {
     "Clarification Heavy": lambda t, ops: _simulate(
         "Clarification Heavy", t, ops, _clarification_rounds(t)
     ),
-    "Context-Aware": lambda t, ops: _simulate(
-        "Context-Aware", t, ops, _CONTEXT_AWARE_ROUNDS
+    "Context Aware": lambda t, ops: _simulate(
+        "Context Aware", t, ops, _CONTEXT_AWARE_ROUNDS
     ),
-    "Intent-Optimized": lambda t, ops: _simulate(
-        "Intent-Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
+    "Intent Optimized": lambda t, ops: _simulate(
+        "Intent Optimized", t, ops, _INTENT_OPTIMIZED_ROUNDS
     ),
-    "Over-Compressed": lambda t, ops: _simulate(
-        "Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
+    "Over Compressed": lambda t, ops: _simulate(
+        "Over Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
     ),
+    "Assumption Led": lambda t, ops: _simulate_assumption_led(t, ops),
 }
 
 
@@ -183,6 +277,8 @@ def apply_output_compression(
                     cumulative_tokens=cumulative,
                     description=rd.description,
                     prompt_text=rd.prompt_text,
+                    token_source=rd.token_source,
+                    assumptions=rd.assumptions,
                 )
             )
         total_input = sum(rd.input_tokens for rd in new_rounds)
@@ -196,13 +292,42 @@ def apply_output_compression(
                 total_tokens=total_input + total_output,
                 operations_achieved=r.operations_achieved,
                 optimized_prompt=r.optimized_prompt,
+                total_assumptions=r.total_assumptions,
+                wrong_assumptions=r.wrong_assumptions,
             )
         )
     return compressed
 
 
+def recount_from_prompts(results: list[SimulationResult]) -> None:
+    """Replace heuristic input token counts with real tiktoken counts.
+
+    For any round that has non-empty prompt_text, replace input_tokens
+    with the actual BPE token count and mark token_source as 'measured'.
+    Recomputes cumulative_tokens and result totals in-place.
+
+    Output tokens remain estimated (no LLM response text available).
+    """
+    from metrics.token_counter import count_tokens
+
+    for result in results:
+        cumulative = 0
+        for rd in result.rounds:
+            if rd.prompt_text and rd.prompt_text.strip():
+                rd.input_tokens = count_tokens(rd.prompt_text)
+                rd.token_source = "measured"
+            cumulative += rd.input_tokens + rd.output_tokens
+            rd.cumulative_tokens = cumulative
+        result.total_input_tokens = sum(r.input_tokens for r in result.rounds)
+        result.total_output_tokens = sum(r.output_tokens for r in result.rounds)
+        result.total_tokens = result.total_input_tokens + result.total_output_tokens
+
+
 def run_simulation(
-    task: str, operations: int, modes: list[str] | None = None
+    task: str,
+    operations: int,
+    modes: list[str] | None = None,
+    assumption_accuracy: float = 1.0,
 ) -> list[SimulationResult]:
     """Run simulations for selected modes.
 
@@ -210,6 +335,7 @@ def run_simulation(
         task: The task description to simulate.
         operations: Number of operations the task requires.
         modes: List of mode names to simulate. Defaults to all modes.
+        assumption_accuracy: Accuracy of assumptions for Assumption Led mode (0.0–1.0).
 
     Returns:
         List of SimulationResult objects.
@@ -224,7 +350,10 @@ def run_simulation(
     results = []
     for mode in modes:
         if mode in SIMULATION_MODES:
-            result = SIMULATION_MODES[mode](task, operations)
+            if mode == "Assumption Led":
+                result = _simulate_assumption_led(task, operations, assumption_accuracy)
+            else:
+                result = SIMULATION_MODES[mode](task, operations)
             result.optimized_prompt = optimized
 
             # Populate prompt texts from catalog
@@ -241,5 +370,11 @@ def run_simulation(
                 if result.rounds:
                     result.rounds[0].prompt_text = prompt_data
 
+            # Populate assumptions list for Assumption Led mode
+            if result.mode == "Assumption Led":
+                if result.rounds and isinstance(prompt_data, list) and prompt_data:
+                    result.rounds[0].assumptions = [prompt_data[0]]
+
             results.append(result)
+    recount_from_prompts(results)
     return results

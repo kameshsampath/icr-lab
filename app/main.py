@@ -16,9 +16,12 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 # --- Navigation (hidden from sidebar — pages use inline nav links) ---
 home_page = st.Page("pages/home.py", title="Home", icon="🏠", default=True)
+payload_page = st.Page(
+    "pages/payload_generator.py", title="Payload Generator", icon="🛠️"
+)
 help_page = st.Page("pages/help.py", title="Help & Glossary", icon="📖")
 
-nav = st.navigation([home_page, help_page], position="hidden")
+nav = st.navigation([home_page, payload_page, help_page], position="hidden")
 
 st.set_page_config(
     page_title="ICR and Token Economics",

@@ -21,8 +21,12 @@ st.markdown(
     "Intent Compression Ratio, or ICR, measures how much useful intent is fulfilled per token consumed."
 )
 st.markdown("In this app:")
-st.latex(r"\text{ICR} = \frac{\text{Intent Fulfilled}}{\text{Total Tokens}} \times 1000")
-st.markdown("Higher ICR means the system achieves the same useful outcome with fewer tokens.")
+st.latex(
+    r"\text{ICR} = \frac{\text{Intent Fulfilled}}{\text{Total Tokens}} \times 1000"
+)
+st.markdown(
+    "Higher ICR means the system achieves the same useful outcome with fewer tokens."
+)
 
 st.divider()
 
@@ -71,10 +75,7 @@ st.markdown(
 )
 st.markdown("Examples in this app:")
 st.markdown(
-    "- Verbose Prompting\n"
-    "- Clarification Heavy\n"
-    "- Context-Aware\n"
-    "- Intent-Optimized"
+    "- Verbose Prompting\n- Clarification Heavy\n- Context-Aware\n- Intent-Optimized"
 )
 
 st.divider()

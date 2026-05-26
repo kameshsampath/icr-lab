@@ -13,11 +13,12 @@ from simulations.engine import SimulationResult
 
 # Color palette for modes (rgb tuples for easy alpha manipulation)
 MODE_COLORS = {
-    "Verbose Prompting": "rgb(239, 68, 68)",       # red
-    "Clarification Heavy": "rgb(249, 115, 22)",    # orange
-    "Context-Aware": "rgb(59, 130, 246)",           # blue
-    "Intent-Optimized": "rgb(16, 185, 129)",        # green
-    "Over-Compressed": "rgb(168, 85, 247)",         # purple
+    "Verbose Prompting": "rgb(239, 68, 68)",  # red
+    "Clarification Heavy": "rgb(249, 115, 22)",  # orange
+    "Context Aware": "rgb(59, 130, 246)",  # blue
+    "Intent Optimized": "rgb(16, 185, 129)",  # green
+    "Over Compressed": "rgb(168, 85, 247)",  # purple
+    "Assumption Led": "rgb(245, 158, 11)",  # amber
 }
 
 
@@ -38,23 +39,29 @@ def token_comparison_chart(metrics: list[ModeMetrics]) -> go.Figure:
 
     fig = go.Figure()
 
-    fig.add_trace(go.Bar(
-        name="Input Tokens",
-        x=modes,
-        y=input_tokens,
-        marker_color=[_with_alpha(c, 0.85) for c in colors],
-        text=[f"{t:,}" for t in input_tokens],
-        textposition="auto",
-    ))
+    fig.add_trace(
+        go.Bar(
+            name="Input Tokens",
+            x=modes,
+            y=input_tokens,
+            marker_color=[_with_alpha(c, 0.85) for c in colors],
+            text=[f"{t:,}" for t in input_tokens],
+            textposition="auto",
+            textfont=dict(color="white"),
+        )
+    )
 
-    fig.add_trace(go.Bar(
-        name="Output Tokens",
-        x=modes,
-        y=output_tokens,
-        marker_color=[_with_alpha(c, 0.5) for c in colors],
-        text=[f"{t:,}" for t in output_tokens],
-        textposition="auto",
-    ))
+    fig.add_trace(
+        go.Bar(
+            name="Output Tokens",
+            x=modes,
+            y=output_tokens,
+            marker_color=[_with_alpha(c, 0.5) for c in colors],
+            text=[f"{t:,}" for t in output_tokens],
+            textposition="auto",
+            textfont=dict(color="white"),
+        )
+    )
 
     fig.update_layout(
         title="Token Usage by Interaction Mode",
@@ -83,15 +90,17 @@ def cumulative_growth_chart(results: list[SimulationResult]) -> go.Figure:
         rounds = [0] + rounds
         cumulative = [0] + cumulative
 
-        fig.add_trace(go.Scatter(
-            x=rounds,
-            y=cumulative,
-            mode="lines+markers",
-            name=result.mode,
-            line=dict(color=color, width=3),
-            marker=dict(size=8),
-            hovertemplate="%{y:,} tokens at round %{x}<extra>%{fullData.name}</extra>",
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=rounds,
+                y=cumulative,
+                mode="lines+markers",
+                name=result.mode,
+                line=dict(color=color, width=3),
+                marker=dict(size=8),
+                hovertemplate="%{y:,} tokens at round %{x}<extra>%{fullData.name}</extra>",
+            )
+        )
 
     fig.update_layout(
         xaxis_title="Interaction Round",
@@ -114,19 +123,34 @@ def cumulative_growth_chart(results: list[SimulationResult]) -> go.Figure:
     return fig
 
 
-def efficiency_dataframe(metrics: list[ModeMetrics]) -> pd.DataFrame:
+def efficiency_dataframe(
+    metrics: list[ModeMetrics], results: list[SimulationResult] | None = None
+) -> pd.DataFrame:
     """Create a styled comparison table of efficiency metrics."""
-    data = {
+    # Build ops_achieved lookup from results if provided
+    ops_map: dict[str, str] = {}
+    if results:
+        for r in results:
+            # Find total ops from any metric (same for all modes since ops is per-task)
+            ops_map[r.mode] = f"{r.operations_achieved}"
+
+    data: dict[str, list] = {
         "Mode": [m.mode for m in metrics],
         "Rounds": [m.interaction_rounds for m in metrics],
-        "Input Tokens": [f"{m.total_input_tokens:,}" for m in metrics],
-        "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
-        "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
-        "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
-        "Raw ICR": [m.raw_icr_score for m in metrics],
-        "Relative ICR": [round(m.icr_score * 100, 1) for m in metrics],
-        "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
     }
+    if ops_map:
+        data["Ops Achieved"] = [ops_map.get(m.mode, "—") for m in metrics]
+    data.update(
+        {
+            "Input Tokens": [f"{m.total_input_tokens:,}" for m in metrics],
+            "Output Tokens": [f"{m.total_output_tokens:,}" for m in metrics],
+            "Total Tokens": [f"{m.total_tokens:,}" for m in metrics],
+            "Est. Cost": [f"${m.estimated_cost:.4f}" for m in metrics],
+            "Raw ICR": [m.raw_icr_score for m in metrics],
+            "Relative ICR": [round(m.icr_score * 100, 1) for m in metrics],
+            "Amplification Factor": [f"{m.token_amplification:.1f}x" for m in metrics],
+        }
+    )
 
     return pd.DataFrame(data)
 
@@ -137,7 +161,8 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
 
     n = len(metrics)
     fig = make_subplots(
-        rows=1, cols=n,
+        rows=1,
+        cols=n,
         specs=[[{"type": "indicator"}] * n],
         horizontal_spacing=0.05,
     )
@@ -145,22 +170,26 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
     for i, m in enumerate(metrics):
         color = MODE_COLORS.get(m.mode, "rgb(107, 114, 128)")
         relative_pct = m.icr_score * 100
-        fig.add_trace(go.Indicator(
-            mode="gauge+number",
-            value=relative_pct,
-            title={"text": ""},
-            number={"font": {"size": 18}, "suffix": "%", "valueformat": ".2f"},
-            gauge=dict(
-                axis=dict(range=[0, 100]),
-                bar=dict(color=color),
-                bgcolor="white",
-                steps=[
-                    dict(range=[0, 30], color="rgb(254, 226, 226)"),
-                    dict(range=[30, 60], color="rgb(254, 243, 199)"),
-                    dict(range=[60, 100], color="rgb(209, 250, 229)"),
-                ],
+        fig.add_trace(
+            go.Indicator(
+                mode="gauge+number",
+                value=relative_pct,
+                title={"text": ""},
+                number={"font": {"size": 18}, "suffix": "%", "valueformat": ".2f"},
+                gauge=dict(
+                    axis=dict(range=[0, 100]),
+                    bar=dict(color=color),
+                    bgcolor="white",
+                    steps=[
+                        dict(range=[0, 30], color="rgb(254, 226, 226)"),
+                        dict(range=[30, 60], color="rgb(254, 243, 199)"),
+                        dict(range=[60, 100], color="rgb(209, 250, 229)"),
+                    ],
+                ),
             ),
-        ), row=1, col=i + 1)
+            row=1,
+            col=i + 1,
+        )
 
     # Add mode labels and raw ICR below each gauge
     for i, m in enumerate(metrics):
@@ -168,8 +197,10 @@ def icr_gauge_chart(metrics: list[ModeMetrics]) -> go.Figure:
         x_center = (domain.x[0] + domain.x[1]) / 2
         fig.add_annotation(
             text=f"<b>{m.mode}</b><br>Raw ICR: {m.raw_icr_score:.2f}",
-            x=x_center, y=-0.2,
-            xref="paper", yref="paper",
+            x=x_center,
+            y=-0.2,
+            xref="paper",
+            yref="paper",
             xanchor="center",
             showarrow=False,
             font=dict(size=11),

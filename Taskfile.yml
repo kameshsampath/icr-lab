@@ -5,3 +5,23 @@ tasks:
     desc: Start ICR lab simulation API on localhost:8080
     cmds:
       - uv run icr-api
+
+  lint:
+    desc: Run ruff linter
+    cmds:
+      - uv run ruff check .
+
+  fmt:
+    desc: Run ruff formatter
+    cmds:
+      - uv run ruff format .
+
+  test:
+    desc: Run test suite
+    cmds:
+      - uv run pytest tests/ -v
+
+  pre-commit:
+    desc: Run all pre-commit hooks
+    cmds:
+      - uv run pre-commit run --all-files

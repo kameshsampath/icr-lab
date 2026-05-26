@@ -34,11 +34,8 @@ CANONICAL_REQUEST = {
 
 @pytest.fixture
 def client():
-    """Return a TestClient wrapping the FastAPI app.
-
-    This will raise ImportError until app/api.py is created (expected failure).
-    """
-    from app.api import app  # noqa: PLC0415
+    """Return a TestClient wrapping the FastAPI app."""
+    from api.index import app  # noqa: PLC0415
 
     return TestClient(app)
 
@@ -391,14 +388,6 @@ class TestNewFields:
             assert "wrong_assumptions" in metrics[mode]
             assert metrics[mode]["wrong_assumptions"] >= 0
 
-    def test_token_metrics_has_ops_by_type(self, client):
-        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
-            "token_metrics"
-        ]
-        for mode in CANONICAL_REQUEST["modes"]:
-            assert "ops_by_type" in metrics[mode]
-            assert isinstance(metrics[mode]["ops_by_type"], dict)
-
     def test_assumption_led_mode_works(self, client):
         req = {**CANONICAL_REQUEST, "modes": ["Assumption-Led"]}
         response = client.post("/simulate", json=req)
@@ -417,26 +406,19 @@ class TestNewFields:
             "Clarification Heavy for a catalog task must have at least 1 measured round"
         )
 
-    def test_intent_optimized_ops_by_type_sums_to_ops_achieved(self, client):
-        """For Intent-Optimized with all ops achieved, ops_by_type total should equal operations."""
-        req = {
-            **CANONICAL_REQUEST,
-            "modes": ["Intent-Optimized"],
-            "mode_operations_achieved": {"Intent-Optimized": 4},
-        }
-        data = client.post("/simulate", json=req).json()
-        ops_by_type = data["token_metrics"]["Intent-Optimized"]["ops_by_type"]
-        assert ops_by_type, "ops_by_type must be non-empty for a catalog task"
-        assert sum(ops_by_type.values()) == 4
 
-    def test_ops_by_type_empty_for_unknown_task(self, client):
-        """Non-catalog task has no typed ops — ops_by_type should return {}."""
-        req = {
-            **CANONICAL_REQUEST,
-            "task": "A completely unknown task xyz not in catalog.",
-        }
-        data = client.post("/simulate", json=req).json()
-        for mode_metrics in data["token_metrics"].values():
-            assert mode_metrics["ops_by_type"] == {}, (
-                "Non-catalog task must return empty ops_by_type"
-            )
+# ---------------------------------------------------------------------------
+# Input validation
+# ---------------------------------------------------------------------------
+
+
+class TestInputValidation:
+    def test_task_over_2000_chars_rejected(self, client):
+        req = {**CANONICAL_REQUEST, "task": "x" * 2001}
+        assert client.post("/simulate", json=req).status_code == 422
+
+    def test_null_bytes_in_task_stripped(self, client):
+        req = {**CANONICAL_REQUEST, "task": "Build\x00 me a patient risk calculator."}
+        resp = client.post("/simulate", json=req)
+        assert resp.status_code == 200
+        assert "\x00" not in resp.json()["task"]

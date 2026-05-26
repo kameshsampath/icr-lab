@@ -2,14 +2,11 @@
 
 from examples.catalog import _load, get_example
 
-# Tasks not shown in the UI dropdown (kept in catalog for test/API use only)
-_HIDDEN_TASKS: frozenset[str] = frozenset({"Build me a patient risk calculator."})
-
 _ACTION_WORDS: frozenset[str] | None = None
 
 
 def _ui_tasks() -> list[str]:
-    return [t for t in _load().keys() if t not in _HIDDEN_TASKS]
+    return list(_load().keys())
 
 
 def _build_action_words() -> frozenset[str]:

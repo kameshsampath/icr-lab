@@ -47,6 +47,7 @@ def token_comparison_chart(metrics: list[ModeMetrics]) -> go.Figure:
             marker_color=[_with_alpha(c, 0.85) for c in colors],
             text=[f"{t:,}" for t in input_tokens],
             textposition="auto",
+            textfont=dict(color="white"),
         )
     )
 
@@ -58,6 +59,7 @@ def token_comparison_chart(metrics: list[ModeMetrics]) -> go.Figure:
             marker_color=[_with_alpha(c, 0.5) for c in colors],
             text=[f"{t:,}" for t in output_tokens],
             textposition="auto",
+            textfont=dict(color="white"),
         )
     )
 

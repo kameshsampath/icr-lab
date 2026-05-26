@@ -88,37 +88,6 @@ with st.sidebar:
         ),
     )
 
-    # Live status badge — only shown after simulation has run at least once
-    if (
-        task_input
-        and "Assumption Led" in (selected_modes or [])
-        and "results" in st.session_state
-    ):
-        from simulations.engine import _task_complexity  # noqa: PLC0415
-
-        _c = _task_complexity(task_input)
-        _total_a = 1 + (_c % 3)
-        _wrong = min(math.ceil(_total_a * (1 - assumption_accuracy)), _total_a)
-        _rounds = 1 + (_wrong * 2 if _wrong > 0 else 0)
-        _ops_preview = st.session_state.get("operations")
-        _ops_achieved = (
-            math.floor(_ops_preview * assumption_accuracy) if _ops_preview else None
-        )
-        _ops_part = (
-            f" &nbsp;·&nbsp; <b>{_ops_achieved}/{_ops_preview}</b> ops"
-            if _ops_achieved is not None
-            else ""
-        )
-        st.markdown(
-            f"<p style='font-size:0.78rem;opacity:0.7;margin-top:-0.4rem;'>"
-            f"<b>{_wrong}/{_total_a}</b> wrong"
-            f" &nbsp;·&nbsp; <b>{_rounds}</b> round(s)"
-            f"{_ops_part}"
-            f" &nbsp;·&nbsp; <b>{int(assumption_accuracy * 100)}%</b> accurate"
-            f"</p>",
-            unsafe_allow_html=True,
-        )
-
     st.divider()
 
     # Requirements — pre-filled from catalog, editable by user
@@ -162,6 +131,37 @@ with st.sidebar:
         width="stretch",
         disabled=not task_input or not selected_modes,
     )
+
+    # Live status badge — shown on Run Simulation click and updates on slider
+    if (
+        task_input
+        and "Assumption Led" in (selected_modes or [])
+        and (run_clicked or "results" in st.session_state)
+    ):
+        from simulations.engine import _task_complexity  # noqa: PLC0415
+
+        _c = _task_complexity(task_input)
+        _total_a = 1 + (_c % 3)
+        _wrong = min(math.ceil(_total_a * (1 - assumption_accuracy)), _total_a)
+        _rounds = 1 + (_wrong * 2 if _wrong > 0 else 0)
+        _ops_preview = st.session_state.get("operations")
+        _ops_achieved = (
+            math.floor(_ops_preview * assumption_accuracy) if _ops_preview else None
+        )
+        _ops_part = (
+            f" &nbsp;·&nbsp; <b>{_ops_achieved}/{_ops_preview}</b> ops"
+            if _ops_achieved is not None
+            else ""
+        )
+        st.markdown(
+            f"<p style='font-size:0.78rem;opacity:0.7;margin-top:0.2rem;'>"
+            f"<b>{_wrong}/{_total_a}</b> wrong"
+            f" &nbsp;·&nbsp; <b>{_rounds}</b> round(s)"
+            f"{_ops_part}"
+            f" &nbsp;·&nbsp; <b>{int(assumption_accuracy * 100)}%</b> accurate"
+            f"</p>",
+            unsafe_allow_html=True,
+        )
 
 # --- Global style tweaks ---
 st.markdown(

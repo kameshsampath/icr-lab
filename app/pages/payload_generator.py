@@ -63,10 +63,11 @@ st.divider()
 
 st.subheader("Simulation Modes")
 all_modes = sorted(SIMULATION_MODES.keys())
-selected_modes = st.multiselect(
+selected_modes = st.pills(
     "Modes to simulate",
     options=all_modes,
     default=all_modes,
+    selection_mode="multi",
     help="Leave empty to simulate all modes",
 )
 
@@ -88,7 +89,7 @@ assumption_accuracy = st.slider(
     "Model accuracy on assumptions",
     min_value=0.0,
     max_value=1.0,
-    value=1.0,
+    value=0.85,
     step=0.05,
     help=(
         "Only affects Assumption Led mode. "
@@ -115,24 +116,6 @@ if preset != "— custom —":
 
 st.divider()
 
-with st.expander("Per-mode Operations Override (advanced)", expanded=False):
-    st.caption(
-        "Override how many operations each mode achieves. "
-        "Useful for demoing partial coverage scenarios."
-    )
-    mode_ops_override: dict[str, int] = {}
-    for mode in selected_modes or all_modes:
-        val = st.number_input(
-            mode,
-            min_value=0,
-            max_value=100,
-            value=-1,
-            step=1,
-            key=f"mode_ops_{mode}",
-            help="-1 = use simulated value (no override)",
-        )
-        if val >= 0:
-            mode_ops_override[mode] = val
 
 # --- Build payload ---
 payload: dict = {"task": task_value or ""}
@@ -144,8 +127,7 @@ if requirements_list:
     payload["requirements"] = requirements_list
 if assumption_accuracy != 1.0:
     payload["assumption_accuracy"] = round(assumption_accuracy, 4)
-if mode_ops_override:
-    payload["mode_operations_achieved"] = mode_ops_override
+
 
 st.divider()
 st.subheader("Generated Payload")
@@ -161,7 +143,7 @@ _compact_json = json.dumps(payload, separators=(",", ":"))
 # Escape single quotes for POSIX shell: replace ' with '\''
 _safe_json = _compact_json.replace("'", "'\\''")
 curl_cmd = (
-    "curl -s -X POST http://localhost:8000/simulate \\\n"
+    "curl -s -X POST http://localhost:8080/simulate \\\n"
     "  -H 'Content-Type: application/json' \\\n"
     f"  -d '{_safe_json}'"
 )

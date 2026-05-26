@@ -59,10 +59,11 @@ streamlit run app/main.py
 
 1. Select or enter a task in the sidebar
 2. Choose simulation modes to compare
-3. Adjust **Assumption Accuracy** (affects Assumption Led mode — 1.0 = perfect, 0.0 = all wrong)
-4. Click **Run Simulation**
-5. Explore: ICR gauges, token comparison, cumulative growth, prompt comparison, interaction traces
-6. Use the **Payload Generator** page to build an API request JSON and cURL command
+3. Adjust **Assumption Accuracy** — affects Assumption Led mode (`ops_achieved = floor(ops × accuracy)`)
+4. Optionally enter **Requirements** (pre-filled from catalog) to see a per-mode coverage grid
+5. Click **Run Simulation**
+6. Explore: ICR gauges, token comparison, cumulative growth, requirements coverage, prompt comparison, interaction traces
+7. Use the **Payload Generator** page to build and copy a ready-to-run API request
 
 ## Simulation Modes
 
@@ -127,7 +128,7 @@ uv run uvicorn api.index:app --reload
 | `operations` | int | auto | Number of operations; auto-derived from catalog when omitted |
 | `modes` | string[] | all | Modes to simulate |
 | `requirements` | string[] | `[]` | Requirements to map against `operations_achieved` |
-| `assumption_accuracy` | float 0–1 | `1.0` | Fraction of assumptions correct in Assumption Led mode |
+| `assumption_accuracy` | float 0–1 | `0.85` | Fraction of ops achieved = `floor(ops × accuracy)` in Assumption Led mode |
 | `mode_operations_achieved` | dict | `{}` | Override per-mode `operations_achieved` for demo scenarios |
 
 Use the **Payload Generator** page in the app to build requests visually.

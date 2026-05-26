@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+  api:
+    desc: Start ICR lab simulation API on localhost:8080
+    cmds:
+      - uv run icr-api

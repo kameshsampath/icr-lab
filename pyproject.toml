@@ -7,10 +7,14 @@ dependencies = [
     "streamlit>=1.57.0",
     "plotly>=5.18.0",
     "pandas>=2.0.0",
+    "fastapi>=0.136.3",
+    "uvicorn>=0.47.0",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]
 icr-lab = "app._cli:main"
+icr-api = "app._cli:run_api"
 
 [build-system]
 requires = ["hatchling"]
@@ -21,6 +25,10 @@ packages = ["app", "simulations", "metrics", "visuals", "examples"]
 
 [dependency-groups]
 dev = [
+    "fastapi>=0.136.3",
+    "httpx>=0.28.1",
+    "pytest>=9.0.3",
+    "uvicorn>=0.47.0",
     "watchdog>=6.0.0",
 ]
 

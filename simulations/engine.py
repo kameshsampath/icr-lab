@@ -5,7 +5,7 @@ showing how interaction architecture affects token consumption.
 """
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -19,6 +19,7 @@ class InteractionRound:
     description: str
     prompt_text: str = ""
     token_source: str = "estimated"
+    assumptions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -32,6 +33,8 @@ class SimulationResult:
     total_tokens: int
     operations_achieved: int
     optimized_prompt: str = ""
+    total_assumptions: int = 0
+    wrong_assumptions: int = 0
 
 
 def _task_complexity(task: str) -> int:
@@ -119,6 +122,51 @@ def _clarification_rounds(task: str) -> list[tuple[float, float, str]]:
     ]
 
 
+_ASSUMPTION_DESCRIPTIONS = [
+    "Agent infers missing context and executes with stated assumptions",
+    "Correction round: user identifies a wrong assumption",
+    "Re-execution with corrected parameters",
+    "Second correction: additional assumption was wrong",
+    "Final re-execution with all corrections applied",
+]
+
+
+def _assumption_led_rounds(task: str) -> list[tuple[float, float, str]]:
+    """Generate round specs for assumption-led mode.
+
+    Round 1: agent states assumptions and executes (low input — user said little,
+    higher output — agent infers and acts). Subsequent rounds are corrections
+    for wrong assumptions. Number of wrong assumptions derived from task complexity.
+    """
+    wrong = _task_complexity(task) % 3  # 0, 1, or 2 wrong assumptions
+    rounds = [
+        (
+            0.6,
+            1.4,
+            _ASSUMPTION_DESCRIPTIONS[0],
+        )
+    ]
+    for i in range(wrong):
+        rounds.append(
+            (
+                1.8 + i * 0.4,
+                0.9,
+                _ASSUMPTION_DESCRIPTIONS[min(i + 1, len(_ASSUMPTION_DESCRIPTIONS) - 1)],
+            )
+        )
+    if wrong > 0:
+        rounds.append(
+            (
+                1.2,
+                1.6,
+                _ASSUMPTION_DESCRIPTIONS[
+                    min(wrong + 1, len(_ASSUMPTION_DESCRIPTIONS) - 1)
+                ],
+            )
+        )
+    return rounds
+
+
 def _simulate(
     mode: str, task: str, operations: int, round_specs: list[tuple[float, float, str]]
 ) -> SimulationResult:
@@ -150,6 +198,9 @@ SIMULATION_MODES = {
     ),
     "Over-Compressed": lambda t, ops: _simulate(
         "Over-Compressed", t, ops, _OVER_COMPRESSED_ROUNDS
+    ),
+    "Assumption-Led": lambda t, ops: _simulate(
+        "Assumption-Led", t, ops, _assumption_led_rounds(t)
     ),
 }
 
@@ -265,6 +316,14 @@ def run_simulation(
             elif isinstance(prompt_data, str):
                 if result.rounds:
                     result.rounds[0].prompt_text = prompt_data
+
+            # Populate assumptions for Assumption-Led mode
+            if result.mode == "Assumption-Led":
+                wrong = _task_complexity(task) % 3
+                result.total_assumptions = 1 + wrong
+                result.wrong_assumptions = wrong
+                if result.rounds and isinstance(prompt_data, list) and prompt_data:
+                    result.rounds[0].assumptions = [prompt_data[0]]
 
             results.append(result)
     recount_from_prompts(results)

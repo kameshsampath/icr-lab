@@ -100,15 +100,20 @@ with st.sidebar:
         _ops_achieved = (
             math.floor(_ops_preview * assumption_accuracy) if _ops_preview else None
         )
-
-        _sc1, _sc2, _sc3, _sc4 = st.columns(4)
-        _sc1.metric("Wrong", f"{_wrong}/{_total_a}", help="Wrong assumptions / total")
-        _sc2.metric("Rounds", _rounds, help="Correction rounds needed")
-        if _ops_achieved is not None:
-            _sc3.metric(
-                "Ops", f"{_ops_achieved}/{_ops_preview}", help="Ops achieved / total"
-            )
-        _sc4.metric("Accuracy", f"{int(assumption_accuracy * 100)}%")
+        _ops_part = (
+            f" &nbsp;·&nbsp; <b>{_ops_achieved}/{_ops_preview}</b> ops"
+            if _ops_achieved is not None
+            else ""
+        )
+        st.markdown(
+            f"<p style='font-size:0.78rem;opacity:0.7;margin-top:-0.4rem;'>"
+            f"<b>{_wrong}/{_total_a}</b> wrong"
+            f" &nbsp;·&nbsp; <b>{_rounds}</b> round(s)"
+            f"{_ops_part}"
+            f" &nbsp;·&nbsp; <b>{int(assumption_accuracy * 100)}%</b> accurate"
+            f"</p>",
+            unsafe_allow_html=True,
+        )
 
     st.divider()
 

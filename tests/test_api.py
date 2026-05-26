@@ -85,12 +85,16 @@ class TestSimulateEndpoint:
         assert "savings_hypothesis" in data
 
     def test_token_metrics_present_for_each_requested_mode(self, client):
-        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()["token_metrics"]
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
         for mode in ["Clarification Heavy", "Intent-Optimized"]:
             assert mode in metrics
 
     def test_token_metrics_has_input_output_total_fields(self, client):
-        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()["token_metrics"]
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
         for mode in ["Clarification Heavy", "Intent-Optimized"]:
             m = metrics[mode]
             assert "input_tokens" in m
@@ -98,7 +102,9 @@ class TestSimulateEndpoint:
             assert "total_tokens" in m
 
     def test_token_metrics_has_icr_and_amplification(self, client):
-        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()["token_metrics"]
+        metrics = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "token_metrics"
+        ]
         for mode in ["Clarification Heavy", "Intent-Optimized"]:
             m = metrics[mode]
             assert "icr" in m
@@ -123,7 +129,9 @@ class TestSimulateEndpoint:
                 assert "description" in rnd
 
     def test_savings_hypothesis_has_required_fields(self, client):
-        savings = client.post("/simulate", json=CANONICAL_REQUEST).json()["savings_hypothesis"]
+        savings = client.post("/simulate", json=CANONICAL_REQUEST).json()[
+            "savings_hypothesis"
+        ]
         assert "token_savings_pct" in savings
         assert "cost_savings_pct" in savings
         assert "rounds_saved" in savings
@@ -169,7 +177,10 @@ class TestRequirementsCoverage:
         """2 of 4 ops achieved → first 2 requirements pass, last 2 fail."""
         req = {
             **CANONICAL_REQUEST,
-            "mode_operations_achieved": {"Clarification Heavy": 2, "Intent-Optimized": 4},
+            "mode_operations_achieved": {
+                "Clarification Heavy": 2,
+                "Intent-Optimized": 4,
+            },
         }
         coverage = client.post("/simulate", json=req).json()["requirements_coverage"]
         ch = coverage["Clarification Heavy"]
@@ -188,7 +199,9 @@ class TestDeterminism:
     def test_identical_request_produces_identical_response(self, client):
         r1 = client.post("/simulate", json=CANONICAL_REQUEST).json()
         r2 = client.post("/simulate", json=CANONICAL_REQUEST).json()
-        assert r1 == r2, "Simulation must be fully deterministic: same input → same output"
+        assert r1 == r2, (
+            "Simulation must be fully deterministic: same input → same output"
+        )
 
     def test_determinism_across_different_task_strings(self, client):
         """Different tasks produce consistently different (not random) results."""
@@ -228,7 +241,10 @@ class TestEdgeCases:
         assert response.status_code == 200
 
     def test_unknown_task_falls_back_to_synthetic_simulation(self, client):
-        req = {**CANONICAL_REQUEST, "task": "A completely unknown task not in catalog xyz."}
+        req = {
+            **CANONICAL_REQUEST,
+            "task": "A completely unknown task not in catalog xyz.",
+        }
         response = client.post("/simulate", json=req)
         assert response.status_code == 200
         assert "trace" in response.json()
@@ -292,17 +308,27 @@ class TestPatientRiskCatalogEntry:
 
         example = get_example(PATIENT_RISK_TASK)
         assert example is not None
-        ops_lower = [op.lower() for op in example["operations"]]
-        assert any("form" in op or "input" in op for op in ops_lower), "Missing input form op"
-        assert any("formula" in op or "weighted" in op for op in ops_lower), "Missing weighted formula op"
-        assert any("badge" in op or "color" in op for op in ops_lower), "Missing color badge op"
-        assert any("breakdown" in op for op in ops_lower), "Missing formula breakdown op"
+        ops_lower = [op["name"].lower() for op in example["operations"]]
+        assert any("form" in op or "input" in op for op in ops_lower), (
+            "Missing input form op"
+        )
+        assert any("formula" in op or "weighted" in op for op in ops_lower), (
+            "Missing weighted formula op"
+        )
+        assert any("badge" in op or "color" in op for op in ops_lower), (
+            "Missing color badge op"
+        )
+        assert any("breakdown" in op for op in ops_lower), (
+            "Missing formula breakdown op"
+        )
 
     def test_catalog_entry_clarification_heavy_has_seven_rounds(self):
         from examples.catalog import get_prompt_for_mode  # noqa: PLC0415
 
         rounds = get_prompt_for_mode(PATIENT_RISK_TASK, "Clarification Heavy")
-        assert isinstance(rounds, list), "Clarification Heavy must return a list of prompts"
+        assert isinstance(rounds, list), (
+            "Clarification Heavy must return a list of prompts"
+        )
         assert len(rounds) == 7, (
             f"Expected 7 scripted Clarification Heavy rounds, got {len(rounds)}"
         )
@@ -319,8 +345,8 @@ class TestPatientRiskCatalogEntry:
         assert example is not None, (
             "patient-risk-calculator must be registered in examples/catalog.py"
         )
-        prompt = example["prompts"].get("Intent-Optimized", "")
-        assert prompt, "Catalog entry must have an Intent-Optimized prompt key"
+        prompt = example["prompts"].get("intent_optimized", "")
+        assert prompt, "Catalog entry must have an intent_optimized prompt key"
         assert len(prompt) > 100, (
             f"Intent-Optimized prompt must be the extracted intent block (>100 chars), "
             f"got {len(prompt)} chars: {prompt!r}"

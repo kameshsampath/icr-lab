@@ -10,10 +10,14 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from examples.sample_tasks import SAMPLE_TASKS, get_operations_count
-from metrics.calculator import compute_metrics, compute_savings
-from simulations.engine import SIMULATION_MODES, run_simulation, apply_output_compression
-from visuals.charts import (
+from examples.sample_tasks import SAMPLE_TASKS, get_operations_count  # noqa: E402
+from metrics.calculator import compute_metrics, compute_savings  # noqa: E402
+from simulations.engine import (  # noqa: E402
+    SIMULATION_MODES,
+    run_simulation,
+    apply_output_compression,
+)
+from visuals.charts import (  # noqa: E402
     cumulative_growth_chart,
     efficiency_dataframe,
     icr_gauge_chart,
@@ -71,7 +75,10 @@ with st.sidebar:
     if apply_compression:
         compression_factor = st.slider(
             "Compression factor",
-            min_value=0.30, max_value=1.0, value=0.65, step=0.05,
+            min_value=0.30,
+            max_value=1.0,
+            value=0.65,
+            step=0.05,
             help="1.0 = no compression, 0.65 = Caveman default (~35% reduction)",
         )
     else:

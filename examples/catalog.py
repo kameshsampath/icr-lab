@@ -523,7 +523,21 @@ def get_optimized_prompt(task: str) -> str:
     # Synthetic generation for custom tasks
     words = task.split()
     # Keep action verbs and key nouns, drop filler
-    filler = {"the", "a", "an", "with", "and", "to", "for", "in", "on", "of", "that", "is", "be"}
+    filler = {
+        "the",
+        "a",
+        "an",
+        "with",
+        "and",
+        "to",
+        "for",
+        "in",
+        "on",
+        "of",
+        "that",
+        "is",
+        "be",
+    }
     key_words = [w for w in words if w.lower() not in filler]
     return " ".join(key_words[:8]) + ("." if len(key_words) > 0 else "")
 
@@ -572,7 +586,6 @@ def get_prompt_for_mode(task: str, mode: str) -> str | list[str]:
             "OK, proceeding with the standard approach.",
         ]
     elif mode == "Context-Aware":
-        words = task.split()
         return f"{task}. Handle dependencies automatically, validate on completion."
     else:  # Intent-Optimized
         return get_optimized_prompt(task)

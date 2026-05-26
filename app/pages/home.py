@@ -88,8 +88,12 @@ with st.sidebar:
         ),
     )
 
-    # Live status badge — visible inline below the slider
-    if task_input and "Assumption Led" in (selected_modes or []):
+    # Live status badge — only shown after simulation has run at least once
+    if (
+        task_input
+        and "Assumption Led" in (selected_modes or [])
+        and "results" in st.session_state
+    ):
         from simulations.engine import _task_complexity  # noqa: PLC0415
 
         _c = _task_complexity(task_input)

@@ -18,6 +18,7 @@ class InteractionRound:
     cumulative_tokens: int
     description: str
     prompt_text: str = ""
+    token_source: str = "estimated"
 
 
 @dataclass
@@ -201,6 +202,30 @@ def apply_output_compression(
     return compressed
 
 
+def recount_from_prompts(results: list[SimulationResult]) -> None:
+    """Replace heuristic input token counts with real tiktoken counts.
+
+    For any round that has non-empty prompt_text, replace input_tokens
+    with the actual BPE token count and mark token_source as 'measured'.
+    Recomputes cumulative_tokens and result totals in-place.
+
+    Output tokens remain estimated (no LLM response text available).
+    """
+    from metrics.token_counter import count_tokens
+
+    for result in results:
+        cumulative = 0
+        for rd in result.rounds:
+            if rd.prompt_text and rd.prompt_text.strip():
+                rd.input_tokens = count_tokens(rd.prompt_text)
+                rd.token_source = "measured"
+            cumulative += rd.input_tokens + rd.output_tokens
+            rd.cumulative_tokens = cumulative
+        result.total_input_tokens = sum(r.input_tokens for r in result.rounds)
+        result.total_output_tokens = sum(r.output_tokens for r in result.rounds)
+        result.total_tokens = result.total_input_tokens + result.total_output_tokens
+
+
 def run_simulation(
     task: str, operations: int, modes: list[str] | None = None
 ) -> list[SimulationResult]:
@@ -242,4 +267,5 @@ def run_simulation(
                     result.rounds[0].prompt_text = prompt_data
 
             results.append(result)
+    recount_from_prompts(results)
     return results

@@ -119,7 +119,7 @@ with st.sidebar:
     requirements_text = st.text_area(
         "One requirement per line",
         value=_default_reqs,
-        height=90,
+        height=120,
         key=f"reqs_{task_input[:60] if task_input else ''}",
         help="Pre-filled from the task catalog. Add, remove, or edit as needed.",
     )
@@ -153,6 +153,20 @@ with st.sidebar:
         width="stretch",
         disabled=not task_input or not selected_modes,
     )
+
+# --- Global style tweaks ---
+st.markdown(
+    """
+    <style>
+    /* Slightly smaller font inside all alert/info/success/warning boxes */
+    [data-testid="stAlertContainer"] p,
+    [data-testid="stAlertContainer"] li {
+        font-size: 0.85rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # --- Main Content ---
 col_title, col_nav1, col_nav2 = st.columns([4, 1, 1])

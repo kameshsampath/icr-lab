@@ -12,6 +12,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
+from examples.catalog import get_operation_commands  # noqa: E402
 from examples.sample_tasks import SAMPLE_TASKS, get_operations_count  # noqa: E402
 from metrics.calculator import compute_metrics, compute_savings  # noqa: E402
 from simulations.engine import (  # noqa: E402
@@ -142,13 +143,16 @@ with st.sidebar:
 
     st.divider()
 
-    # Optional requirements list for coverage display
-    st.markdown("**Requirements** *(optional)*")
+    # Requirements — pre-filled from catalog, editable by user
+    st.markdown("**Requirements**")
+    _catalog_reqs = get_operation_commands(task_input) if task_input else []
+    _default_reqs = "\n".join(_catalog_reqs)
     requirements_text = st.text_area(
         "One requirement per line",
-        placeholder="input form\nweighted formula\ncolor badge\nformula breakdown",
+        value=_default_reqs,
         height=90,
-        help="When provided, a requirements coverage grid is shown below the simulation results.",
+        key=f"reqs_{task_input[:60] if task_input else ''}",
+        help="Pre-filled from the task catalog. Add, remove, or edit as needed.",
     )
     requirements_list = [r.strip() for r in requirements_text.splitlines() if r.strip()]
 

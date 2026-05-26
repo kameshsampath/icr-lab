@@ -176,8 +176,15 @@ if not run_clicked and "results" not in st.session_state:
     st.info("Click **Run Simulation** to compare interaction modes.")
     st.stop()
 
-# Run simulation
-if run_clicked:
+# Run simulation — triggered by button click OR assumption_accuracy slider change
+# (accuracy is a simulation parameter, not a post-processing step)
+_accuracy_changed = (
+    "results" in st.session_state
+    and "Assumption Led" in (selected_modes or [])
+    and assumption_accuracy != st.session_state.get("assumption_accuracy")
+)
+
+if run_clicked or _accuracy_changed:
     operations = get_operations_count(task_input)
     results = run_simulation(
         task_input, operations, selected_modes, assumption_accuracy=assumption_accuracy

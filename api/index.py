@@ -47,12 +47,12 @@ class SimulateRequest(BaseModel):
         return round(v, 4)
 
 
-@app.get("/health")
+@app.get("/api/health")
 def health():
     return {"status": "ok"}
 
 
-@app.post("/simulate")
+@app.post("/api/simulate")
 def simulate(req: SimulateRequest):
     # Resolve operations: use explicit value or derive from catalog/heuristic
     operations = (
